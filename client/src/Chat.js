@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react'
+import ScrollToBottom from 'react-scroll-to-bottom'
 
 // mui
+import { css } from '@emotion/css'
 import { Grid, TextField, Button, Box, Typography } from '@mui/material'
 import SendIcon from '@mui/icons-material/SendOutlined'
 import LogoutIcon from '@mui/icons-material/Logout'
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined'
+
+// config
+const scrollCss = css({ height: 400, marginTop: '40px' })
 
 export default function Chat({ socket, user, encrypt, decrypt, leaveChat }) {
   const [message, setMessage] = useState('')
@@ -30,8 +35,9 @@ export default function Chat({ socket, user, encrypt, decrypt, leaveChat }) {
 
   return (
     <>
-      <Typography variant="h2">Pozdravljeni, {user}</Typography>
-      <Box sx={{ margin: '50px' }} />
+      <Typography variant="h2" sx={{ marginBottom: '50px' }}>
+        Klepet
+      </Typography>
 
       <Grid container spacing={2}>
         <Grid item xs={8}>
@@ -55,14 +61,18 @@ export default function Chat({ socket, user, encrypt, decrypt, leaveChat }) {
         </Grid>
       </Grid>
 
-      <Box sx={{ marginTop: '40px' }}>
+      <Box sx={{ fontStyle: 'oblique', marginBottom: '50px' }}>
+        <Typography variant="p">* S sporočilom GAMESTART in GAMESTOP lahko igrate igro ugibanja besed.</Typography>
+      </Box>
+
+      <ScrollToBottom className={scrollCss}>
         {messages.map(({ user, message }, i) => (
           <Typography key={i}>
             <ChevronRightOutlinedIcon />
             <strong>{user}</strong>: {decrypt(message)}
           </Typography>
         ))}
-      </Box>
+      </ScrollToBottom>
     </>
   )
 }

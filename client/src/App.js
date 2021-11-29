@@ -28,7 +28,7 @@ export default function App() {
   }
 
   const leaveChat = () => {
-    socket.emit('leave', name)
+    socket.emit('leave')
     setShowChat(false)
     setName('')
   }
@@ -36,7 +36,7 @@ export default function App() {
   return (
     <>
       <CssBaseline />
-      <Container maxWidth="sm" sx={{ marginTop: '80px' }}>
+      <Container maxWidth="lg" sx={{ marginTop: '80px' }}>
         {!showChat ? (
           <Login name={name} setName={setName} joinChat={joinChat} />
         ) : (
