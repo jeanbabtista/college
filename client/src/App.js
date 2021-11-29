@@ -1,12 +1,17 @@
 import React, { useState } from 'react'
 import io from 'socket.io-client'
+import CryptoJS from 'crypto-js'
 
 // mui
-import { Container, Grid, Button, Box } from '@mui/material'
+import { Container, CssBaseline } from '@mui/material'
 
 // components
-import IconInput from './IconInput'
+import Login from './Login'
 import Chat from './Chat'
+
+// encryption
+const encrypt = (message, key = 'ključ123') => CryptoJS.AES.encrypt(message, key).toString()
+const decrypt = (message, key = 'ključ123') => CryptoJS.AES.decrypt(message, key).toString(CryptoJS.enc.Utf8)
 
 // config
 const url = 'http://localhost:5000'
@@ -17,8 +22,8 @@ export default function App() {
   const [showChat, setShowChat] = useState(false)
 
   const joinChat = () => {
-    if (!name) return
-    socket.emit('join', name)
+    const message = encrypt(name)
+    socket.emit('join', message)
     setShowChat(true)
   }
 
@@ -29,33 +34,15 @@ export default function App() {
   }
 
   return (
-    <Container maxWidth="sm">
-      {!showChat ? (
-        <div>
-          <h1>Prijavite se v klepet {name}</h1>
-          <Box sx={{ margin: '50px' }} />
-
-          <Grid container spacing={4}>
-            <Grid item xs={6}>
-              <IconInput label="Ime" onChange={(e) => setName(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && joinChat()} />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Button variant="contained" onClick={() => name && joinChat()}>
-                Prijava
-              </Button>
-            </Grid>
-          </Grid>
-        </div>
-      ) : (
-        <>
-          <Chat socket={socket} user={name} />
-
-          <Button variant="contained" onClick={leaveChat}>
-            Odjava
-          </Button>
-        </>
-      )}
-    </Container>
+    <>
+      <CssBaseline />
+      <Container maxWidth="sm" sx={{ marginTop: '80px' }}>
+        {!showChat ? (
+          <Login name={name} setName={setName} joinChat={joinChat} />
+        ) : (
+          <Chat socket={socket} user={name} encrypt={encrypt} decrypt={decrypt} leaveChat={leaveChat} />
+        )}
+      </Container>
+    </>
   )
 }
