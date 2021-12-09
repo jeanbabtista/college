@@ -2,7 +2,6 @@ use std::env;
 use std::io;
 use std::io::prelude::*;
 use std::os::unix::net::UnixStream;
-use std::path::Path;
 
 // max bytes size
 const MAX_SIZE: usize = 1024;
@@ -16,19 +15,11 @@ fn main() {
     }
 
     // write message to server
-    args[0] = args[0][13..].to_string(); // remove target/build/
+    args[0] = "imenik_iskanje".to_string();
 
     // send data to server
-    handle_server(&mut args);
-}
-
-fn handle_server(args: &Vec<String>) {
-    // program is closing with message EXIT, otherwise must install crate 'ctrlc'
+    // type EXIT to close, otherwise install crate 'ctrlc'
     loop {
-        // connect to server
-        let path = Path::new("/tmp/s");
-        let mut stream = UnixStream::connect(path).unwrap();
-
         let mut pattern = String::new();
         println!("Search pattern:");
         io::stdin()
@@ -36,6 +27,10 @@ fn handle_server(args: &Vec<String>) {
             .ok()
             .expect("Failed to read line.");
 
+        // connect to server
+        let mut stream = UnixStream::connect("/tmp/s").unwrap();
+
+        // send message to server
         let mut message = format!("{}.{}", args.join("."), pattern);
         message.pop();
         message.push('.');
@@ -44,11 +39,7 @@ fn handle_server(args: &Vec<String>) {
         // receive response from server
         let mut buffer = vec![0; MAX_SIZE];
         stream.read(&mut buffer[..]).unwrap();
-        let message = String::from_utf8(buffer).unwrap();
+        let message = String::from_utf8(buffer[..].to_vec()).unwrap();
         println!("# Server: {}", message);
-
-        if pattern.trim() == "EXIT" {
-            break;
-        }
     }
 }

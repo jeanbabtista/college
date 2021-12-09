@@ -47,13 +47,13 @@ pub struct PhoneBook {
     pub users: Vec<User>,
 }
 
-impl Clone for PhoneBook {
+/* impl Clone for PhoneBook {
     fn clone(&self) -> PhoneBook {
         PhoneBook {
             users: self.users.clone(),
         }
     }
-}
+} */
 
 impl PhoneBook {
     pub fn new() -> PhoneBook {

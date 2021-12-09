@@ -17,7 +17,7 @@ fn main() {
     let mut stream = UnixStream::connect("/tmp/s").unwrap();
 
     // write message to server
-    args[0] = args[0][13..].to_string(); // remove target/build/
+    args[0] = "imenik_zapri".to_string();
     let mut message = args.join(".");
     message.push('.');
     stream.write(message.as_bytes()).unwrap();
