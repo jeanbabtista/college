@@ -1,18 +1,20 @@
-import express from 'express'
-import http from 'http'
-import fs from 'fs/promises'
-import cors from 'cors'
-import { Server } from 'socket.io'
-import CryptoJS from 'crypto-js'
+const express = require('express')
 const app = express()
+const http = require('http')
+const cors = require('cors')
+const { Server } = require('socket.io')
+const CryptoJS = require('crypto-js')
 
 // middleware
 app.use(cors())
 
 // config
-const url = `http://localhost:5000`
-const origin = `http://localhost:3000`
 const PORT = 5000
+const REACT_PORT = 5000
+const url = `http://localhost:${PORT}`
+const origin = `http://localhost:${REACT_PORT}`
+
+// socket io
 const server = http.createServer(app)
 const io = new Server(server, {
   cors: { origin: origin, methods: ['GET', 'POST'] },
@@ -37,6 +39,19 @@ const broadcast = ({ user, message }, socket = null) => {
 
 // users
 const users = new Map()
+const words = ['omrežje', 'wifi', 'usmerjevalnik', 'zvezdišče', 'ethernet']
+let word = ''
+let guess = ''
+let game = false
+
+const getUserScore = (key) => users.get(key).score
+const incUserScore = (key) => users.set(key, { ...users.get(key), score: users.get(key).score + 1 })
+const getGuessWord = () => {
+  if (word) return guess
+  word = words[Math.floor(Math.random() * words.length)]
+  for (let i = 0; i < word.length; i++) guess += i % 2 == 0 ? word[i] : '_'
+  return guess
+}
 
 io.on('connection', (socket) => {
   socket.on('join', (data) => {
@@ -53,6 +68,35 @@ io.on('connection', (socket) => {
   socket.on('send', ({ user, message }) => {
     const decrypted = decrypt(message)
     broadcast(getMsg(decrypted, user), socket)
+
+    if (game) {
+      // correct guess
+      if (decrypted == word) {
+        word = ''
+        guess = ''
+        incUserScore(socket)
+        broadcast(getMsg(`Uporabnik ${user} je pravilo uganil besedo!`))
+        broadcast(getMsg(`Ugani besedo: ${getGuessWord()}`))
+      } else {
+        broadcast(getMsg(`Napačna beseda. Poskusite znova.`))
+        broadcast(getMsg(`Ugani besedo: ${getGuessWord()}`))
+      }
+    }
+
+    if (decrypted === 'GAMESTART' && !game) {
+      game = true
+      broadcast(getMsg('Začenja se igra ugibanja besed. Začnite pisati!'))
+      broadcast(getMsg(`Ugani besedo: ${getGuessWord()}`))
+    }
+
+    if (decrypted === 'GAMESTOP' && game) {
+      game = false
+      broadcast(getMsg(`Uporabnik ${user} je ustavil igro.`))
+
+      data = 'Rezultati:'
+      for (const [key, value] of users) data += value.name + ' - ' + value.score + ' točk '
+      broadcast(getMsg(data))
+    }
   })
 
   socket.on('leave', () => {
