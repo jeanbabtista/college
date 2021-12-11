@@ -1,8 +1,0 @@
-- LA predavanja idi skozi
-- OS zadnji dve predavanji
-- pri MUR in RA se pozanimaj kaj se je na zadnje delalo in si poglej
-
-- RA vaja 6, 7, 8
-- OS vaja 2 (rustlang) in 3 (c)
-- MUR vaja 4
-- RPO vaja 7 z zaslonskimi posnetki vseh orodij za planiranje (MS planner, Discord, ...)

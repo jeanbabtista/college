@@ -1,41 +1,74 @@
 const express = require('express')
 const app = express()
-const multer = require('multer')
-const http = require('http')
 const cors = require('cors')
-const { Server } = require('socket.io')
-const CryptoJS = require('crypto-js')
+const fs = require('fs')
+const { exit } = require('process')
+const multer = require('multer')
+
+const init = () => {
+  const port = parseInt(process.argv[2])
+  const mode = process.argv[3]
+  const serverPort = mode == 'c' ? parseInt(process.argv[4]) : null
+
+  const dir = `files/files-${port}`
+  if (!fs.existsSync(dir))
+    fs.mkdirSync(dir, (e) => console.log('Error:', e.message))
+
+  return [port, dir, mode, serverPort]
+}
 
 // middleware
 app.use(cors())
 
 // config
-const PORT = 5000
-const REACT_PORT = 3000
-const url = `http://localhost:${PORT}`
-const origin = `http://localhost:${REACT_PORT}`
-const files = []
-
-// multer config
-const dest = './files'
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, dest),
-  filename: (req, file, cb) => cb(null, file.originalname),
+const [port, dir, mode, serverPort] = init()
+const url = `http://localhost:${port}`
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, dir),
+    filename: (req, file, cb) => cb(null, file.originalname),
+  }),
 })
 
-const fileUpload = multer({ storage })
+switch (mode) {
+  case 's': {
+    const http = require('http')
+    const { Server } = require('socket.io')
+    const socket = http.createServer(app)
+    const io = new Server(socket)
+
+    io.on('connection', (socket) => {
+      console.log('A client connected!')
+      socket.emit('join_server', 'Hello from server!')
+    })
+
+    socket.listen(port, () => console.log(url))
+    break
+  }
+  case 'c': {
+    const io = require('socket.io-client')
+    const socket = io.connect(`http://localhost:${serverPort}`)
+
+    socket.on('join_server', (data) => {
+      console.log('Server:', data)
+    })
+
+    break
+  }
+  default:
+    console.log('Invalid mode.')
+}
 
 // routes
 app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Hello World!', files })
+  res.status(200).json({ message: 'Hello World!' })
 })
 
-app.post('/upload', fileUpload.single('file'), (req, res) => {
+app.post('/upload', upload.single('file'), (req, res) => {
   const { file } = req
-  files.push(file)
+  console.log('file received:', file)
+  res.status(200).json({ file })
 })
-
-app.listen(PORT, () => console.log(`http://localhost:${PORT}`))
 
 /* // socket io
 const server = http.createServer(app)
@@ -106,4 +139,4 @@ io.on('connection', (socket) => {
 
 
 // server
-server.listen(PORT, () => console.log(url)) */
+server.listen(port, () => console.log(url)) */
