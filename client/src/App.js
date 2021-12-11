@@ -8,20 +8,23 @@ import { Container, CssBaseline } from '@mui/material'
 // components
 import Login from './Login'
 import Chat from './Chat'
+import UploadFile from './UploadFile'
 
 // encryption
-const encrypt = (message, key = 'ključ123') => CryptoJS.AES.encrypt(message, key).toString()
-const decrypt = (message, key = 'ključ123') => CryptoJS.AES.decrypt(message, key).toString(CryptoJS.enc.Utf8)
+const encrypt = (message, key = 'ključ123') =>
+  CryptoJS.AES.encrypt(message, key).toString()
+const decrypt = (message, key = 'ključ123') =>
+  CryptoJS.AES.decrypt(message, key).toString(CryptoJS.enc.Utf8)
 
 // config
 const url = 'http://localhost:5000'
-const socket = io.connect(url)
+// const socket = io.connect(url)
 
 export default function App() {
   const [name, setName] = useState('')
   const [showChat, setShowChat] = useState(false)
 
-  const joinChat = () => {
+  /* const joinChat = () => {
     const message = encrypt(name)
     socket.emit('join', message)
     setShowChat(true)
@@ -31,18 +34,27 @@ export default function App() {
     socket.emit('leave')
     setShowChat(false)
     setName('')
-  }
+  } */
 
   return (
     <>
       <CssBaseline />
       <Container maxWidth="lg" sx={{ marginTop: '80px' }}>
         {!showChat ? (
-          <Login name={name} setName={setName} joinChat={joinChat} />
+          <Login name={name} setName={setName} /* joinChat={joinChat} */ />
         ) : (
-          <Chat socket={socket} user={name} encrypt={encrypt} decrypt={decrypt} leaveChat={leaveChat} />
+          <h1>Hello world!</h1>
+          /*  <Chat
+            socket={socket}
+            user={name}
+            encrypt={encrypt}
+            decrypt={decrypt}
+            leaveChat={leaveChat}
+          /> */
         )}
       </Container>
+
+      <UploadFile />
     </>
   )
 }
