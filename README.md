@@ -1,12 +1,16 @@
-Server:
+# DH exchange:
 
-- npm start [server port] [s]
+Alice -> A
+Bob -> B
 
-Client:
+AB | generate prime number q and int t
+AB | generate private key Priv(A | B) < q
+AB | calculate public key Publ(A | B) = t ^ Priv(A | B)
 
-- npm start [client port] [c] [server port]
+A | sends Publ(A) to B
+B | sends Publ(B) to A
 
-Example:
+A | calculates secret key K(A) = Publ(B) ^ Priv(A)
+B | calculates secret key K(B) = Publ(A) ^ Priv(B)
 
-- Server: npm start 5000 s
-- Client: npm start 9000 c 5000
+K(A) === K(B)
