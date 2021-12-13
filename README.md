@@ -1,16 +1,8 @@
-# DH exchange:
+# File encryption through sockets with hybrid encryption
 
-Alice -> A
-Bob -> B
+## Example run
 
-AB | generate prime number q and int t
-AB | generate private key Priv(A | B) < q
-AB | calculate public key Publ(A | B) = t ^ Priv(A | B)
-
-A | sends Publ(A) to B
-B | sends Publ(B) to A
-
-A | calculates secret key K(A) = Publ(B) ^ Priv(A)
-B | calculates secret key K(B) = Publ(A) ^ Priv(B)
-
-K(A) === K(B)
+- npm start 9000 9001 [ 9000 becomes server, 9001 becomes client ]
+- npm start 9001 9000
+- cd client && npm start [ start React app ]
+- upload a file on browser

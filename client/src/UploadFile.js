@@ -4,11 +4,12 @@ import axios from 'axios'
 // mui
 import { Grid, Button, Typography } from '@mui/material'
 
-const UploadFile = ({ urlFrom, urlTo }) => {
+// toastify
+
+export default function UploadFile({ urlFrom, urlTo }) {
   const [file, setFile] = useState('')
 
   const handleFile = (e) => setFile(e.target.files[0])
-
   const handleUpload = async (e) => {
     e.preventDefault()
 
@@ -45,5 +46,3 @@ const UploadFile = ({ urlFrom, urlTo }) => {
     </form>
   )
 }
-
-export default UploadFile
