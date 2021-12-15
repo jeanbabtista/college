@@ -1,5 +1,11 @@
 #include "memory.h"
 
+#define print_h1(msg) printf("\n%s\n", msg);
+#define print_num(msg, num) printf("\t-> %s: %d\n", msg, num)
+#define print_ptr(msg, addr) printf("\t-> %s: %lu\n", msg, (long)addr % (10u * 10 * 10 * 10))
+
+typedef enum { false, true } bool;
+
 struct alloc_info {
     unsigned size_actual;
     unsigned size_total;
@@ -13,13 +19,13 @@ struct segment_info {
 } typedef segment_info;
 
 alloc_info* ptr_alloc_info;
-static int is_first_alloc = 1;
+bool is_first_alloc = true;
 
 void* my_malloc(const unsigned size_user_data) {
     printf("\n---------- MY MALLOC ---------");
 
     if (is_first_alloc) {
-        is_first_alloc = 0;
+        is_first_alloc = false;
 
         // round size_total to multiple of getpagesize()
         const unsigned size_total = sizeof(alloc_info) + getpagesize() - sizeof(alloc_info) % getpagesize();
@@ -31,17 +37,18 @@ void* my_malloc(const unsigned size_user_data) {
         ptr_alloc_info->num_of_segments = 0;
         ptr_alloc_info->ptr_first_free_segment = ptr_alloc_info + 1;
 
-        printf("\nalloc_info:\n");
-        printf("\t-> address: %lu\n", (long)ptr_alloc_info % (10u * 10 * 10 * 10));
-        printf("\t-> actual size: %d\n", ptr_alloc_info->size_actual);
-        printf("\t-> total size: %d\n", ptr_alloc_info->size_total);
-        printf("\t-> number of segments: %d\n", ptr_alloc_info->num_of_segments);
-        printf("\t-> first free segment: %lu\n", (long)ptr_alloc_info->ptr_first_free_segment % (10u * 10 * 10 * 10));
+        print_h1("alloc_info");
+        print_ptr("address", ptr_alloc_info);
+        print_num("actual size", ptr_alloc_info->size_actual);
+        print_num("total size", ptr_alloc_info->size_total);
+        print_num("number of segments", ptr_alloc_info->num_of_segments);
+        print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
     }
 
     // if no space is available at current page for new segment, map new memory
     const int space_left = ptr_alloc_info->size_total - ptr_alloc_info->size_actual - size_user_data - sizeof(segment_info);
     printf("\nSpace left: %d\n", space_left);
+
     if (space_left <= 0) {
         // round size_total to multiple of getpagesize()
         const unsigned size_total = size_user_data + sizeof(alloc_info) + getpagesize() - (size_user_data + sizeof(alloc_info)) % getpagesize();
@@ -53,14 +60,13 @@ void* my_malloc(const unsigned size_user_data) {
         ptr_alloc_info->num_of_segments = 0;
         ptr_alloc_info->ptr_first_free_segment = ptr_alloc_info + 1;
 
-        printf("\nReserved more space:");
-        printf("\nalloc_info:\n");
-        printf("\t-> address: %lu\n", (long)ptr_alloc_info % (10u * 10 * 10 * 10));
-        printf("\t-> actual size: %d\n", ptr_alloc_info->size_actual);
-        printf("\t-> total size: %d\n", ptr_alloc_info->size_total);
-        printf("\t-> number of segments: %d\n", ptr_alloc_info->num_of_segments);
-        printf("\t-> first free segment: %lu\n", (long)ptr_alloc_info->ptr_first_free_segment % (10u * 10 * 10 * 10));
-
+        print_h1("Reserved more space");
+        print_h1("alloc_info");
+        print_ptr("address", ptr_alloc_info);
+        print_num("actual size", ptr_alloc_info->size_actual);
+        print_num("total size", ptr_alloc_info->size_total);
+        print_num("number of segments", ptr_alloc_info->num_of_segments);
+        print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
     }
 
     // create new segment_info object
@@ -68,20 +74,20 @@ void* my_malloc(const unsigned size_user_data) {
     ptr_current_segment->ptr_page = (void*)ptr_alloc_info;
     ptr_current_segment->size = size_user_data + sizeof(segment_info);
 
-    printf("\nsegment_info:\n");
-    printf("\t-> address: %lu\n", (long)ptr_current_segment % (10u * 10 * 10 * 10));
-    printf("\t-> page ptr: %lu\n", (long)ptr_current_segment->ptr_page % (10u * 10 * 10 * 10));
-    printf("\t-> size: %d\n", ptr_current_segment->size);
+    print_h1("segment_info");
+    print_ptr("address", ptr_current_segment);
+    print_ptr("page ptr", ptr_current_segment->ptr_page);
+    print_num("size", ptr_current_segment->size);
 
     // update alloc_info object
     ptr_alloc_info->num_of_segments++;
     ptr_alloc_info->size_actual += ptr_current_segment->size;
     ptr_alloc_info->ptr_first_free_segment += ptr_current_segment->size;
 
-    printf("\nalloc_info:\n");
-    printf("\t-> actual size: %d\n", ptr_alloc_info->size_actual);
-    printf("\t-> number of segments: %d\n", ptr_alloc_info->num_of_segments);
-    printf("\t-> first free segment: %lu\n", (long)ptr_alloc_info->ptr_first_free_segment % (10u * 10 * 10 * 10));
+    print_h1("alloc_info");
+    print_num("actual size", ptr_alloc_info->size_actual);
+    print_num("number of segments", ptr_alloc_info->num_of_segments);
+    print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
 
     // return [ address of segment ] + [ size of segment ]
     return (void*)ptr_current_segment + sizeof(segment_info);
@@ -97,11 +103,11 @@ void my_free(void* ptr_memory) {
     ptr_alloc_info->num_of_segments--;
 
     printf("\n---------- MY FREE ---------");
-    printf("\nalloc_info:\n");
-    printf("\t-> address: %lu\n", (long)ptr_alloc_info % (10u * 10 * 10 * 10));
-    printf("\t-> number of segments: %d\n", ptr_alloc_info->num_of_segments);
-    printf("\nsegment_info:\n");
-    printf("\t-> address: %lu\n", (long)ptr_current_segment % (10u * 10 * 10 * 10));
+    print_h1("alloc_info");
+    print_ptr("address", ptr_alloc_info);
+    print_num("number of segments", ptr_alloc_info->num_of_segments);
+    print_h1("segment_info");
+    print_ptr("address", ptr_current_segment);
 
     // if no segments available, then deallocate memory
     if (!ptr_alloc_info->num_of_segments) {
@@ -112,7 +118,7 @@ void my_free(void* ptr_memory) {
         // no dangling pointers
         ptr_alloc_info = NULL;
 
-        printf("Memory unmapped.\n");
+        print_h1("Memory unmapped");
         return;
     }
 }
