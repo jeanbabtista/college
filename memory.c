@@ -1,29 +1,40 @@
 #include "memory.h"
 
-#define print_h1(msg) printf("\n%s\n", msg);
-#define print_num(msg, num) printf("\t-> %s: %d\n", msg, num)
-#define print_ptr(msg, addr) printf("\t-> %s: %lu\n", msg, (long)addr % (10u * 10 * 10 * 10))
-
 typedef enum { false, true } bool;
 
-struct alloc_info {
-    unsigned size_actual;
-    unsigned size_total;
-    unsigned num_of_segments;
-    void* ptr_first_free_segment;
-} typedef alloc_info;
+#define DEBUG false
 
 struct segment_info {
     unsigned size;
     void* ptr_page;
+    struct segment_info
+        * ptr_prev,
+        * ptr_next;
 } typedef segment_info;
 
-alloc_info* ptr_alloc_info;
+struct alloc_info {
+    unsigned
+        size_actual,
+        size_total,
+        num_of_segments;
+    void* ptr_first_free_segment;
+    segment_info
+        * ptr_head_segment_info,
+        * ptr_tail_segment_info;
+} typedef alloc_info;
+
+// globals
+alloc_info
+* ptr_alloc_info,
+* ptr_head_alloc_info,
+* ptr_tail_alloc_info;
+
 bool is_first_alloc = true;
 
 void* my_malloc(const unsigned size_user_data) {
     printf("\n---------- MY MALLOC ---------");
 
+    // create alloc_info object
     if (is_first_alloc) {
         is_first_alloc = false;
 
@@ -37,17 +48,27 @@ void* my_malloc(const unsigned size_user_data) {
         ptr_alloc_info->num_of_segments = 0;
         ptr_alloc_info->ptr_first_free_segment = ptr_alloc_info + 1;
 
-        print_h1("alloc_info");
-        print_ptr("address", ptr_alloc_info);
-        print_num("actual size", ptr_alloc_info->size_actual);
-        print_num("total size", ptr_alloc_info->size_total);
-        print_num("number of segments", ptr_alloc_info->num_of_segments);
-        print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
+        // set linked list pointers
+        ptr_alloc_info->ptr_head_segment_info = ptr_alloc_info->ptr_tail_segment_info = NULL;
+
+        // set head and tail of linked list
+        ptr_head_alloc_info = ptr_tail_alloc_info = ptr_alloc_info;
+
+        if (DEBUG) {
+            print_h1("alloc_info");
+            print_ptr("address", ptr_alloc_info);
+            print_num("actual size", ptr_alloc_info->size_actual);
+            print_num("total size", ptr_alloc_info->size_total);
+            print_num("number of segments", ptr_alloc_info->num_of_segments);
+            print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
+        }
     }
 
-    // if no space is available at current page for new segment, map new memory
+    // if no space is available at current page for new segment, create new alloc_info object
     const int space_left = ptr_alloc_info->size_total - ptr_alloc_info->size_actual - size_user_data - sizeof(segment_info);
-    printf("\nSpace left: %d\n", space_left);
+
+    if (DEBUG)
+        printf("\nSpace left: %d\n", space_left);
 
     if (space_left <= 0) {
         // round size_total to multiple of getpagesize()
@@ -59,35 +80,75 @@ void* my_malloc(const unsigned size_user_data) {
         ptr_alloc_info->size_total = size_total;
         ptr_alloc_info->num_of_segments = 0;
         ptr_alloc_info->ptr_first_free_segment = ptr_alloc_info + 1;
+        /*
+        !!!
+        PRAVILNO KORIGIRAJ KAZALCE !!!
+        !!!
+        ptr_alloc_info->ptr_head_segment_info = ptr_alloc_info->ptr_tail_segment_info = NULL;
+        */
 
-        print_h1("Reserved more space");
-        print_h1("alloc_info");
-        print_ptr("address", ptr_alloc_info);
-        print_num("actual size", ptr_alloc_info->size_actual);
-        print_num("total size", ptr_alloc_info->size_total);
-        print_num("number of segments", ptr_alloc_info->num_of_segments);
-        print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
+        if (DEBUG) {
+            print_h1("Reserved more space");
+            print_h1("alloc_info");
+            print_ptr("address", ptr_alloc_info);
+            print_num("actual size", ptr_alloc_info->size_actual);
+            print_num("total size", ptr_alloc_info->size_total);
+            print_num("number of segments", ptr_alloc_info->num_of_segments);
+            print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
+        }
     }
 
-    // create new segment_info object
+    // create segment info
     segment_info* ptr_current_segment = (segment_info*)ptr_alloc_info->ptr_first_free_segment;
-    ptr_current_segment->ptr_page = (void*)ptr_alloc_info;
     ptr_current_segment->size = size_user_data + sizeof(segment_info);
+    ptr_current_segment->ptr_page = (void*)ptr_alloc_info;
 
-    print_h1("segment_info");
-    print_ptr("address", ptr_current_segment);
-    print_ptr("page ptr", ptr_current_segment->ptr_page);
-    print_num("size", ptr_current_segment->size);
+    // set linked list pointers
+    if (!ptr_alloc_info->num_of_segments) {
+        ptr_current_segment->ptr_prev = ptr_current_segment->ptr_next = NULL;
+        ptr_alloc_info->ptr_head_segment_info = ptr_alloc_info->ptr_tail_segment_info = ptr_current_segment;
+    }
+    else {
+        ptr_current_segment->ptr_prev = ptr_alloc_info->ptr_tail_segment_info;
+        ptr_current_segment->ptr_next = NULL;
+        ptr_alloc_info->ptr_tail_segment_info->ptr_next = ptr_current_segment;
+        ptr_alloc_info->ptr_tail_segment_info = ptr_current_segment;
+    }
 
     // update alloc_info object
     ptr_alloc_info->num_of_segments++;
     ptr_alloc_info->size_actual += ptr_current_segment->size;
     ptr_alloc_info->ptr_first_free_segment += ptr_current_segment->size;
 
-    print_h1("alloc_info");
-    print_num("actual size", ptr_alloc_info->size_actual);
-    print_num("number of segments", ptr_alloc_info->num_of_segments);
-    print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
+    if (DEBUG) {
+        print_h1("segment_info");
+        print_ptr("address", ptr_current_segment);
+        print_ptr("page ptr", ptr_current_segment->ptr_page);
+        print_ptr("ptr_prev", ptr_current_segment->ptr_prev);
+        print_ptr("ptr_next", ptr_current_segment->ptr_next);
+        print_num("size", ptr_current_segment->size);
+
+        print_h1("alloc_info");
+        print_num("actual size", ptr_alloc_info->size_actual);
+        print_num("number of segments", ptr_alloc_info->num_of_segments);
+        print_ptr("first free segment", ptr_alloc_info->ptr_first_free_segment);
+        print_ptr("head segment", ptr_alloc_info->ptr_head_segment_info);
+        print_ptr("tail segment", ptr_alloc_info->ptr_tail_segment_info);
+    }
+
+    if (DEBUG) {
+        print_h1("Printing segment_info list");
+        segment_info* temp = ptr_alloc_info->ptr_head_segment_info;
+        while (temp) {
+            print_num("size", (int)(temp->size - sizeof(segment_info)));
+            print_ptr("address", temp);
+            print_ptr("prev", temp->ptr_prev);
+            print_ptr("next", temp->ptr_next);
+            printf("\n");
+
+            temp = temp->ptr_next;
+        }
+    }
 
     // return [ address of segment ] + [ size of segment ]
     return (void*)ptr_current_segment + sizeof(segment_info);
