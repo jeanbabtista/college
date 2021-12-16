@@ -11,11 +11,14 @@ int main() {
     int* _array = (int*)my_malloc(size * sizeof(int));
     print_ptr("&_array[]", _array);
 
-    /* const unsigned new_size = 1100;
-    int* new_array = (int*)my_malloc(new_size * sizeof(int));
-    printf("\n&new array: %lu\n", (long)new_array % (10u * 10 * 10 * 10));
+    const unsigned new_size = 1100;
+    int* big_array_1 = (int*)my_malloc(new_size * sizeof(int));
+    print_ptr("&big_array_1[]", big_array_1);
 
-    my_free(new_array);
+    int* big_array_2 = (int*)my_malloc(new_size * sizeof(int));
+    print_ptr("&big_array_2[]", big_array_2);
+
+    /* my_free(new_array);
     my_free(array);
     my_free(abc);
     my_free(_array);
