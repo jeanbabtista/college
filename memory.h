@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <limits.h>
 
 #define print_h1(msg) printf("\n%s\n", msg);
 #define print_num(msg, num) printf("\t-> %s: %d\n", msg, num)

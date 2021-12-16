@@ -1,22 +1,32 @@
 #include "memory.h"
 
 int main() {
-    const unsigned size = 10;
-    int* array = (int*)my_malloc(size * sizeof(int));
-    print_ptr("&array[]", array);
+    int* big_array = (int*)my_malloc(4400);
+    print_ptr("&big array", big_array);
+    my_free(big_array);
 
-    char* abc = (char*)my_malloc(size * sizeof(char));
-    print_ptr("&char[]", abc);
+    /* const unsigned size = 10;
+    int* a = (int*)my_malloc(size * sizeof(int));
+    print_ptr("&a[]", a);
 
-    int* _array = (int*)my_malloc(size * sizeof(int));
-    print_ptr("&_array[]", _array);
+    char* b = (char*)my_malloc(size * sizeof(char));
+    print_ptr("&b[]", b);
 
-    const unsigned new_size = 1100;
+    int* c = (int*)my_malloc(size * sizeof(int));
+    print_ptr("&c[]", c);
+
+    my_free(c);
+    my_free(b);
+    my_free(a);
+
+
+
+    /* const unsigned new_size = 1100;
     int* big_array_1 = (int*)my_malloc(new_size * sizeof(int));
     print_ptr("&big_array_1[]", big_array_1);
 
     int* big_array_2 = (int*)my_malloc(new_size * sizeof(int));
-    print_ptr("&big_array_2[]", big_array_2);
+    // print_ptr("&big_array_2[]", big_array_2); */
 
     /* my_free(new_array);
     my_free(array);
