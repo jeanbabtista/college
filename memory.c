@@ -1,98 +1,12 @@
 #include "memory.h"
 
-typedef enum { false, true } bool;
-
-#define DEBUG true
-
-struct segment_info {
-    unsigned size;
-    void* ptr_page;
-
-    struct segment_info
-        * ptr_prev,
-        * ptr_next;
-} typedef segment_info;
-
-struct alloc_info {
-    unsigned
-        size_actual,
-        size_total;
-    void* ptr_first_free_segment;
-
-    segment_info
-        * ptr_head_segment_info,
-        * ptr_tail_segment_info;
-
-    struct alloc_info
-        * ptr_prev,
-        * ptr_next;
-} typedef alloc_info;
-
 // globals
 alloc_info* g_ptr_head_alloc_info = NULL;
 alloc_info* g_ptr_tail_alloc_info = NULL;
 
-unsigned get_size_rounded(unsigned size_user_data) {
-    unsigned size = size_user_data + sizeof(alloc_info) + sizeof(segment_info);
-    for (unsigned i = 1; i < INT_MAX; i++)
-        if (size > (i - 1) * getpagesize() && size <= i * getpagesize())
-            return i * getpagesize();
-    return 0;
-}
-
-alloc_info* allocate(const unsigned size_total) {
-    alloc_info* ptr_alloc_info = NULL;
-
-    // info
-    ptr_alloc_info = (alloc_info*)mmap(NULL, size_total, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    ptr_alloc_info->size_actual = sizeof(alloc_info);
-    ptr_alloc_info->size_total = size_total;
-    ptr_alloc_info->ptr_first_free_segment = ptr_alloc_info + 1;
-
-    // segment linked list
-    ptr_alloc_info->ptr_head_segment_info = ptr_alloc_info->ptr_tail_segment_info = NULL;
-    ptr_alloc_info->ptr_prev = ptr_alloc_info->ptr_next = NULL;
-
-    return ptr_alloc_info;
-}
-
-void print_alloc_info(alloc_info* ptr_alloc_info) {
-    printf("\t- actual size:          %u\n", ptr_alloc_info->size_actual);
-    printf("\t- total size:           %u\n", ptr_alloc_info->size_total);
-    print_ptr("\t- first free segment:   ", ptr_alloc_info->ptr_first_free_segment);
-    print_ptr("\t- head segment pointer: ", ptr_alloc_info->ptr_head_segment_info);
-    print_ptr("\t- tail segment pointer: ", ptr_alloc_info->ptr_tail_segment_info);
-}
-
-void print_segment_info(segment_info* ptr_segment_info) {
-    printf("\t* actual size:        %u\n", ptr_segment_info->size);
-    print_ptr("\t* pointer to page: ", ptr_segment_info->ptr_page);
-}
-
-void print_linked_list() {
-    alloc_info* ptr_alloc_info = g_ptr_head_alloc_info;
-    while (ptr_alloc_info) {
-        print_ptr("\t- current address:      ", ptr_alloc_info);
-        print_alloc_info(ptr_alloc_info);
-        print_ptr("\t- prev alloc_info:      ", ptr_alloc_info->ptr_prev);
-        print_ptr("\t- next alloc_info:      ", ptr_alloc_info->ptr_next);
-
-        printf("\t- segments\n");
-        segment_info* ptr_segment_info = ptr_alloc_info->ptr_head_segment_info;
-        while (ptr_segment_info) {
-            print_ptr("\t\t* address       ", ptr_segment_info);
-            printf("\t\t* data address: %lu\n", (long)((void*)ptr_segment_info + sizeof(segment_info)) % (10u * 10 * 10 * 10 * 10));
-            print_ptr("\t\t* prev:         ", ptr_segment_info->ptr_prev);
-            print_ptr("\t\t* next:         ", ptr_segment_info->ptr_next);
-            printf("\n");
-
-            ptr_segment_info = ptr_segment_info->ptr_next;
-        }
-
-        printf("\n");
-        ptr_alloc_info = ptr_alloc_info->ptr_next;
-    }
-}
+unsigned get_size_rounded(unsigned);
+alloc_info* allocate(unsigned);
+void print_alloc_info(alloc_info*), print_segment_info(segment_info*), print_linked_list();
 
 void* my_malloc(const unsigned size_user_data) {
     print_h1("---------- MY MALLOC ---------");
@@ -267,5 +181,67 @@ void my_free(void* ptr_memory) {
     if (DEBUG) {
         print_h1("Updated global linked list");
         print_linked_list();
+    }
+}
+
+unsigned get_size_rounded(unsigned size_user_data) {
+    unsigned size = size_user_data + sizeof(alloc_info) + sizeof(segment_info);
+    for (unsigned i = 1; i < INT_MAX; i++)
+        if (size > (i - 1) * getpagesize() && size <= i * getpagesize())
+            return i * getpagesize();
+    return 0;
+}
+
+alloc_info* allocate(const unsigned size_total) {
+    alloc_info* ptr_alloc_info = NULL;
+
+    // info
+    ptr_alloc_info = (alloc_info*)mmap(NULL, size_total, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    ptr_alloc_info->size_actual = sizeof(alloc_info);
+    ptr_alloc_info->size_total = size_total;
+    ptr_alloc_info->ptr_first_free_segment = ptr_alloc_info + 1;
+
+    // segment linked list
+    ptr_alloc_info->ptr_head_segment_info = ptr_alloc_info->ptr_tail_segment_info = NULL;
+    ptr_alloc_info->ptr_prev = ptr_alloc_info->ptr_next = NULL;
+
+    return ptr_alloc_info;
+}
+
+void print_alloc_info(alloc_info* ptr_alloc_info) {
+    printf("\t- actual size:          %u\n", ptr_alloc_info->size_actual);
+    printf("\t- total size:           %u\n", ptr_alloc_info->size_total);
+    print_ptr("\t- first free segment:   ", ptr_alloc_info->ptr_first_free_segment);
+    print_ptr("\t- head segment pointer: ", ptr_alloc_info->ptr_head_segment_info);
+    print_ptr("\t- tail segment pointer: ", ptr_alloc_info->ptr_tail_segment_info);
+}
+
+void print_segment_info(segment_info* ptr_segment_info) {
+    printf("\t* actual size:        %u\n", ptr_segment_info->size);
+    print_ptr("\t* pointer to page: ", ptr_segment_info->ptr_page);
+}
+
+void print_linked_list() {
+    alloc_info* ptr_alloc_info = g_ptr_head_alloc_info;
+    while (ptr_alloc_info) {
+        print_ptr("\t- current address:      ", ptr_alloc_info);
+        print_alloc_info(ptr_alloc_info);
+        print_ptr("\t- prev alloc_info:      ", ptr_alloc_info->ptr_prev);
+        print_ptr("\t- next alloc_info:      ", ptr_alloc_info->ptr_next);
+
+        printf("\t- segments\n");
+        segment_info* ptr_segment_info = ptr_alloc_info->ptr_head_segment_info;
+        while (ptr_segment_info) {
+            print_ptr("\t\t* address       ", ptr_segment_info);
+            printf("\t\t* data address: %lu\n", (long)((void*)ptr_segment_info + sizeof(segment_info)) % (10u * 10 * 10 * 10 * 10));
+            print_ptr("\t\t* prev:         ", ptr_segment_info->ptr_prev);
+            print_ptr("\t\t* next:         ", ptr_segment_info->ptr_next);
+            printf("\n");
+
+            ptr_segment_info = ptr_segment_info->ptr_next;
+        }
+
+        printf("\n");
+        ptr_alloc_info = ptr_alloc_info->ptr_next;
     }
 }
