@@ -8,8 +8,7 @@
 #include <limits.h>
 
 #define print_h1(msg) printf("\n%s\n", msg);
-#define print_num(msg, num) printf("\t-> %s: %d\n", msg, num)
-#define print_ptr(msg, addr) printf("\t-> %s: %lu\n", msg, (long)addr % (10u * 10 * 10 * 10 * 10))
+#define print_ptr(msg, addr) printf("%s%lu\n", msg, (long)addr % (10u * 10 * 10 * 10 * 10))
 
 void* my_malloc(unsigned);
 void my_free(void*);
