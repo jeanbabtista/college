@@ -17,7 +17,6 @@ struct alloc_info {
     unsigned
         size_actual,
         size_total;
-    // num_of_segments;
     void* ptr_first_free_segment;
 
     segment_info
@@ -30,11 +29,8 @@ struct alloc_info {
 } typedef alloc_info;
 
 // globals
-alloc_info
-* g_ptr_head_alloc_info,
-* g_ptr_tail_alloc_info;
-
-bool g_is_first_alloc = true;
+alloc_info* g_ptr_head_alloc_info = NULL;
+alloc_info* g_ptr_tail_alloc_info = NULL;
 
 unsigned get_size_rounded(unsigned size_user_data) {
     unsigned size = size_user_data + sizeof(alloc_info) + sizeof(segment_info);
@@ -49,13 +45,12 @@ void* my_malloc(const unsigned size_user_data) {
     alloc_info* ptr_alloc_info;
 
     // create alloc_info object
-    if (g_is_first_alloc) {
-        g_is_first_alloc = false;
-
+    if (!g_ptr_head_alloc_info && !g_ptr_tail_alloc_info) {
         // round size_total to multiple of getpagesize()
         const unsigned size_total = get_size_rounded(size_user_data);
 
         // allocate memory
+        printf("allocating %u bytes ...", size_total);
         ptr_alloc_info = (alloc_info*)mmap(NULL, size_total, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         ptr_alloc_info->size_actual = sizeof(alloc_info);
         ptr_alloc_info->size_total = size_total;
@@ -78,7 +73,7 @@ void* my_malloc(const unsigned size_user_data) {
     }
 
     // if no space is available at current page for new segment, create new alloc_info object
-    const unsigned space_left = get_size_rounded(size_user_data);
+    const int space_left = ptr_alloc_info->size_total - ptr_alloc_info->size_actual - size_user_data - sizeof(alloc_info) - sizeof(segment_info);
 
     if (DEBUG)
         print_num("Space left", space_left);
@@ -88,12 +83,13 @@ void* my_malloc(const unsigned size_user_data) {
         const unsigned size_total = size_user_data + sizeof(alloc_info) + getpagesize() - (size_user_data + sizeof(alloc_info)) % getpagesize();
 
         // allocate memory
+        printf("allocating additional %u bytes ...", size_total);
         ptr_alloc_info = (alloc_info*)mmap(NULL, size_total, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         ptr_alloc_info->size_actual = sizeof(alloc_info);
         ptr_alloc_info->size_total = size_total;
         ptr_alloc_info->ptr_first_free_segment = ptr_alloc_info + 1;
 
-        // set linked list pointers        
+        // set global linked list pointers - always add to last
         ptr_alloc_info->ptr_prev = g_ptr_tail_alloc_info;
         ptr_alloc_info->ptr_next = NULL;
         g_ptr_tail_alloc_info->ptr_next = ptr_alloc_info;
@@ -189,27 +185,27 @@ void my_free(void* ptr_memory) {
     // remove segment from linked list
     if (!ptr_segment_info->ptr_prev && !ptr_segment_info->ptr_next) {
         if (DEBUG)
-            print_h1("Deleting the only element left");
+            print_h1("Deleting the only segment left");
 
         ptr_alloc_info->ptr_head_segment_info = ptr_alloc_info->ptr_tail_segment_info = NULL;
     }
     else if (!ptr_segment_info->ptr_prev) {
         if (DEBUG)
-            print_h1("Deleting first element");
+            print_h1("Deleting first segment");
 
         ptr_alloc_info->ptr_head_segment_info = ptr_segment_info->ptr_next;
         ptr_segment_info->ptr_next = ptr_segment_info->ptr_next->ptr_prev = NULL;
     }
     else if (!ptr_segment_info->ptr_next) {
         if (DEBUG)
-            print_h1("Deleting last element");
+            print_h1("Deleting last segment");
 
         ptr_alloc_info->ptr_tail_segment_info = ptr_segment_info->ptr_prev;
         ptr_segment_info->ptr_prev = ptr_segment_info->ptr_prev->ptr_next = NULL;
     }
     else {
         if (DEBUG)
-            print_h1("Deleting middle element");
+            print_h1("Deleting middle segment");
 
         ptr_segment_info->ptr_next->ptr_prev = ptr_segment_info->ptr_prev;
         ptr_segment_info->ptr_prev->ptr_next = ptr_segment_info->ptr_next;
@@ -239,6 +235,50 @@ void my_free(void* ptr_memory) {
 
     // if no segments, deallocate memory
     if (!ptr_alloc_info->ptr_head_segment_info && !ptr_alloc_info->ptr_tail_segment_info) {
+        // remove alloc_info from global linked list
+        if (!ptr_alloc_info->ptr_prev && !ptr_alloc_info->ptr_next) {
+            if (DEBUG)
+                print_h1("Deleting the only alloc_info left");
+
+            g_ptr_head_alloc_info = g_ptr_tail_alloc_info = NULL;
+        }
+        else if (!ptr_alloc_info->ptr_prev) {
+            if (DEBUG)
+                print_h1("Deleting first alloc_info");
+
+            g_ptr_head_alloc_info = ptr_alloc_info->ptr_next;
+            ptr_alloc_info->ptr_next = ptr_alloc_info->ptr_next->ptr_prev = NULL;
+        }
+        else if (!ptr_alloc_info->ptr_next) {
+            if (DEBUG)
+                print_h1("Deleting last alloc_info");
+
+            g_ptr_tail_alloc_info = ptr_alloc_info->ptr_prev;
+            ptr_alloc_info->ptr_prev = ptr_alloc_info->ptr_prev->ptr_next = NULL;
+        }
+        else {
+            if (DEBUG)
+                print_h1("Deleting middle alloc_info");
+
+            ptr_alloc_info->ptr_next->ptr_prev = ptr_alloc_info->ptr_prev;
+            ptr_alloc_info->ptr_prev->ptr_next = ptr_alloc_info->ptr_next;
+            ptr_alloc_info->ptr_next = ptr_alloc_info->ptr_prev = NULL;
+        }
+
+        if (DEBUG) {
+            print_h1("Printing alloc_info list after changing");
+            {
+                alloc_info* temp = g_ptr_head_alloc_info;
+                while (temp) {
+                    print_ptr("address", temp);
+                    print_ptr("prev", temp->ptr_prev);
+                    print_ptr("next", temp->ptr_next);
+                    printf("\n");
+                    temp = temp->ptr_next;
+                }
+            }
+        }
+
         const int result = munmap((void*)ptr_alloc_info, ptr_alloc_info->size_total);
         if (result == -1)
             perror("munmap");
