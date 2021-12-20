@@ -50,6 +50,9 @@ void* my_malloc(const unsigned size_user_data) {
             ptr_segment_info->ptr_prev = ptr_segment_info->ptr_next = NULL;
             ptr_temp_alloc_info->ptr_head_segment_info = ptr_temp_alloc_info->ptr_tail_segment_info = ptr_segment_info;
 
+            if (DEBUG)
+                print_segment_info(ptr_segment_info);
+
             break;
         }
 
@@ -72,6 +75,9 @@ void* my_malloc(const unsigned size_user_data) {
             ptr_segment_info->ptr_next = ptr_temp_segment_info;
             ptr_temp_segment_info->ptr_prev = ptr_segment_info;
             ptr_temp_alloc_info->ptr_head_segment_info = ptr_segment_info;
+
+            if (DEBUG)
+                print_segment_info(ptr_segment_info);
 
             break;
         };
@@ -97,6 +103,9 @@ void* my_malloc(const unsigned size_user_data) {
                 ptr_temp_segment_info->ptr_next = ptr_segment_info;
                 ptr_segment_info->ptr_next->ptr_prev = ptr_segment_info;
 
+                if (DEBUG)
+                    print_segment_info(ptr_segment_info);
+
                 stop = true;
                 break;
             };
@@ -104,7 +113,10 @@ void* my_malloc(const unsigned size_user_data) {
             ptr_temp_segment_info = ptr_temp_segment_info->ptr_next;
         }
 
-        size_space = (long unsigned)(void*)ptr_temp_alloc_info + (long unsigned)ptr_temp_alloc_info->size_total - (long unsigned)(void*)ptr_temp_alloc_info->ptr_tail_segment_info + sizeof(segment_info) + size_user_data;
+        if (stop)
+            break;
+
+        size_space = (long unsigned)ptr_temp_alloc_info + ptr_temp_alloc_info->size_total - ((long unsigned)ptr_temp_alloc_info->ptr_tail_segment_info + sizeof(segment_info) + size_user_data);
 
         if (DEBUG)
             printf("\t- Space left in this block:                   %u\n", size_space);
@@ -115,8 +127,8 @@ void* my_malloc(const unsigned size_user_data) {
                 print_h1("Enough space, inserting segment at the end");
 
             // create segment info block
-            void* address = (void*)ptr_temp_alloc_info->ptr_tail_segment_info + sizeof(segment_info) + size_user_data;
-            ptr_segment_info = (segment_info*)address;
+            void* ptr_first_free = (void*)ptr_temp_alloc_info->ptr_tail_segment_info + ptr_temp_alloc_info->ptr_tail_segment_info->size;
+            ptr_segment_info = (segment_info*)ptr_first_free;
             ptr_segment_info->size = size_user_data + sizeof(segment_info);
             ptr_segment_info->ptr_page = (void*)ptr_temp_alloc_info;
 
@@ -125,6 +137,9 @@ void* my_malloc(const unsigned size_user_data) {
             ptr_segment_info->ptr_next = NULL;
             ptr_temp_alloc_info->ptr_tail_segment_info->ptr_next = ptr_segment_info;
             ptr_temp_alloc_info->ptr_tail_segment_info = ptr_segment_info;
+
+            if (DEBUG)
+                print_segment_info(ptr_segment_info);
 
             break;
         }
@@ -282,8 +297,9 @@ void print_alloc_info(alloc_info* ptr_alloc_info) {
 }
 
 void print_segment_info(segment_info* ptr_segment_info) {
-    printf("\t* actual size:        %u\n", ptr_segment_info->size);
-    print_ptr("\t* pointer to page: ", ptr_segment_info->ptr_page);
+    printf("\t* actual size:        %u, sizeof(segment_info): %lu\n", ptr_segment_info->size, sizeof(segment_info));
+    print_ptr("\t* pointer to page:    ", ptr_segment_info->ptr_page);
+    print_ptr("\t* first free:         ", (long)((void*)ptr_segment_info + ptr_segment_info->size) % (10u * 10 * 10 * 10 * 10));
 }
 
 void print_linked_list() {

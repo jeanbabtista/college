@@ -8,7 +8,7 @@
 #include <limits.h>
 
 typedef enum { false, true } bool;
-#define DEBUG true
+#define DEBUG false
 #define print_h1(msg) printf("\n%s\n", msg);
 #define print_ptr(msg, addr) printf("%s%lu\n", msg, (long)addr % (10u * 10 * 10 * 10 * 10))
 
