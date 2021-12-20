@@ -7,11 +7,10 @@
 #include <sys/mman.h>
 #include <limits.h>
 
+typedef enum { false, true } bool;
 #define DEBUG true
 #define print_h1(msg) printf("\n%s\n", msg);
 #define print_ptr(msg, addr) printf("%s%lu\n", msg, (long)addr % (10u * 10 * 10 * 10 * 10))
-
-typedef enum { false, true } bool;
 
 struct segment_info {
     unsigned size;
@@ -24,9 +23,9 @@ struct segment_info {
 
 struct alloc_info {
     unsigned
-        size_actual,
+        // size_actual,
         size_total;
-    void* ptr_first_free_segment;
+    // void* ptr_first_free_segment;
 
     segment_info
         * ptr_head_segment_info,
