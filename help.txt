@@ -1,0 +1,85 @@
+my_malloc()
+my_free()
+
+- implementiramo z mmap() in munmap()
+- napisati moraš knjižnici!!!
+- ko rezerviramo pomnilnik z mmap(), si moramo informacijo o lokaciji pomnilnika shraniti
+- zato bomo ob hrambi pomnilnika zraven shranili še malo več pomnilnika, da bomo
+  nadzorovali informacije o pomnilniku, da bomo vedeli, kje se nahaja
+- sprva z mmap() alociramo, nato v to alokacijo še dodamo struct, ki bo imel preko sistemske informacije
+- nato bomo z my_free() prebrali te info. in sprostili prostor, saj brez teh info ne bi mogli vedeti, kaj se dogaja s pomnilnikom
+- struct alloc_info { int alloc_size;  }
+- primer klica: my_malloc(SIZE); -> vendar znotraj te my_malloc pokličemo mmap(), kjer rezerviramo [SIZE + sizeof(alloc_info)] pomnilnika!
+- uporabniku ne moremo vrniti naslova, ker potem lahko prepiše podatke naše strukture, moramo mu vrniti naslov, na katerem se začne
+  SIZE, ne alloc_info, torej vrnemo [&alloc_info_pointer + sizeof(alloc_info)]
+- rabimo funkcijo getpagesize(), ki je že implementirana v c, da dobimo velikost strani, ki je alocirana
+- int pageSize = getpagesize(); -> uporabnik vedno dobi celo stran, nikoli delček strani, npr. če bo SIZE + sizeof(alloc_info) velik skupaj 965 B,
+  bo vseeno dobil prostor, velik večkratnik od getpagesize() - v Windowsih 4 kb en, torej bi za ta primer bila ena stran dovolj
+- boljše, da seštejemo SIZE + sizeof(alloc_size) in zaokrožimo na najbližji večji večkratnik od getpagesize()
+- zato si je pametno shraniti v alloc_size tudi dejansko velikost, koliko smo shranili, saj je potem lažje free-jati
+- struct alloc_info { int alloc_size; int actual_size }
+- my_free() bo deloval tako, da bomo šli na naslov od my_malloc(), od katerega moramo odšteti sizeof(alloc_info) in nato zbrišemo strani, ki
+  smo jih dodeli prej z munmap, zato smo si shranili int actual_size, saj smo to rezervirali, zdaj pa to sprostimo, torej vbistvu zbrišemo
+  tako, da začnemo na naslovu [mmap_return_addres - sizeof(alloc_info)], od tu pa zbrišemo [actual_size] pomnilnika
+- to naredimo z munmap()
+
+1.) preprosta implementacija
+- my_malloc() vrne le [&alloc_info_pointer + sizeof(alloc_info)]
+- moramo typecastat, da lahko pišemo v prostor SIZE
+- npr. int a = 5; (int *)a = my_malloc(sizeof(a))
+- my_free(a)
+
+2.) dodajanje na konec
+- isto kot 1.), vendar npr. če smo pri prvem klicu my_malloc() v 4 kB stranski zasedli le 1.5 kb, potem imamo še prostora na isti strani!
+- zato ob naslednjih klicih my_malloc() upravljamo z istimi naslovi in ne rabimo na novo dodeliti pomnilnika, za to rabimo še eno strukturo
+- struct odsek_info { int odsek_size; void *stran }; -> za vsak odsek bomo hranili svoje informacije, alloc_info pa bomo imeli le takrat, ko bomo uporabili mmap()
+- void *stran je kazalec na začetek trenutne strani od mmap()
+- moramo vedno preračunati, če lahko nov SIZE od my_malloc() dodamo v isto stran
+- my_free(): v struct alloc_info dodamo int st_odsekov, saj ob vsakem my_free() moramo preveriti, kateri odsek sproščamo, in ga nato sprostimo
+- munmap() v my_free() kličemo lahko le v primeru, ko je le en odsek v strani, torej čisto na koncu!!
+- v struct alloc_info še shranimo kazalec void *prvi_prost, da lahko od tukaj dalje delamo
+- my_malloc(): vrnemo [&stran + sizeof(alloc_info) + sizeof(odsek_info)], zdaj lahko zapisujemo podatke notri v želen SIZE,
+  v void *stran v odsek_info shranimo kazalec na začetek strani (na alloc_info)
+
+
+ob prvem klicu my_malloc(825): return => [&stran + sizeof(alloc_info) + sizeof(odsek_info)]
+  -> v alloc_info bomo shranili kazalec void *prvi_prost na konec SIZE
+ob drugem klicu my_malloc(400): return => [&stran + ...]
+  -> preverimo, ali imamo prostor
+  -> lažje je, če v alloc_info shranimo, koliko še je prostora v strani!
+  -> (* odsek_info)prvi_prost, shranimo podatke o novi alokaciji in nadaljujemo
+ob naslednjih klicih:
+  -> če ni več prostora na strani, znova pokličemo mmap()
+
+my_free(b):
+- dobimo kazalec na PODATKE, ne na odsek_info, zato sprva odštejemo odsek_info in ga castamo na odsek_info
+  in zdaj lahko preberemo podatke iz te strukture, pogledamo void* prvi_prost, ga castamo v alloc_info in
+  lahko preberemo podatke o vsem drugem, preverimo število odsekov, če je 1, zbrišemo vse (munmap), drugače
+  pa nič ne zbrišemo, samo zmanjšamo število odsekov, potem pa lahko potem z my_malloc samo prepišemo!
+
+stran od mmap():
+
+|-----------|
+|	    |
+|  podatki  |
+|	    |
+|-----------|
+| odsek_info|
+|-----------|
+|	    |
+|  podatki  |
+|	    |
+|-----------|
+| odsek_info|
+|-----------|
+| alloc_info|
+|-----------|
+
+
+3. ponovna uporaba sproščenih mest
+- moramo povezat prazne odseke in imeti evidenco, da jih lahko ponovno uporabimo
+- predlog je, da zabeležimo nekam, kjer so sproščeni podatki
+- če ni dovolj prostora, damo na konec, če ni prostora še tam, pa uporabimo novo alokacijo
+- poleg vodenja evidence je še predlog (sicer težji), da razdelimo vsako stran od mmap() na npr.
+  128 bajtov, in npr., če je velikost strani velika 4 kb, dobimo 32 mini strani v tej strani
+- nato v alloc_info dodamo array, kjer vodimo, katera stran je prosta
