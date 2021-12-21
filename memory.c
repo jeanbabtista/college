@@ -34,6 +34,10 @@ void* my_malloc(const unsigned size_user_data) {
 
     // loop through all alloc_info objects and segments and search for available space
     bool stop = false;
+
+    if (DEBUG)
+        printf("\n\t- Space needed for new data:                  %lu\n", size_user_data + sizeof(segment_info));
+
     while (ptr_temp_alloc_info && !stop) {
         segment_info* ptr_temp_segment_info = ptr_temp_alloc_info->ptr_head_segment_info;
 
@@ -61,6 +65,7 @@ void* my_malloc(const unsigned size_user_data) {
         if (DEBUG)
             printf("\t- Space between alloc_info and first segment: %u\n", size_space);
 
+        // insert at the start
         if (size_space >= size_user_data + sizeof(segment_info)) {
             if (DEBUG)
                 print_h1("Enough space, inserting segment at the start");
@@ -82,6 +87,7 @@ void* my_malloc(const unsigned size_user_data) {
             break;
         };
 
+        // insert at the middle
         while (ptr_temp_segment_info->ptr_next) {
             size_space = (long unsigned)(void*)ptr_temp_segment_info->ptr_next - (long unsigned)(void*)ptr_temp_segment_info - ptr_temp_segment_info->size;
 
@@ -93,7 +99,7 @@ void* my_malloc(const unsigned size_user_data) {
                     print_h1("Enough space, inserting segment at the middle");
 
                 // create segment info block
-                ptr_segment_info = (segment_info*)(void*)((ptr_temp_segment_info + 1) + size_user_data);
+                ptr_segment_info = (segment_info*)((void*)ptr_temp_segment_info + sizeof(segment_info) + size_user_data);
                 ptr_segment_info->size = size_user_data + sizeof(segment_info);
                 ptr_segment_info->ptr_page = (void*)ptr_temp_alloc_info;
 
@@ -116,12 +122,12 @@ void* my_malloc(const unsigned size_user_data) {
         if (stop)
             break;
 
-        size_space = (long unsigned)ptr_temp_alloc_info + ptr_temp_alloc_info->size_total - ((long unsigned)ptr_temp_alloc_info->ptr_tail_segment_info + sizeof(segment_info) + size_user_data);
+        size_space = (long unsigned)ptr_temp_alloc_info + ptr_temp_alloc_info->size_total - ((long unsigned)ptr_temp_alloc_info->ptr_tail_segment_info + ptr_temp_alloc_info->ptr_tail_segment_info->size);
 
         if (DEBUG)
             printf("\t- Space left in this block:                   %u\n", size_space);
 
-        // if enough space, insert segment at the end of current alloc_info block
+        // insert at the end
         if (size_space >= size_user_data + sizeof(segment_info)) {
             if (DEBUG)
                 print_h1("Enough space, inserting segment at the end");
