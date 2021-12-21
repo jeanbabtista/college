@@ -1,7 +1,6 @@
-#include "memory.h"
+#include "mymalloc.h"
 
-typedef enum { false, true } bool;
-#define DEBUG false
+#define DEBUG 1
 #define debug_print_ptr(msg, addr) if (DEBUG) print_ptr(msg, addr)
 #define debug_print_h1(msg) if (DEBUG) print_h1(msg)
 
@@ -58,7 +57,7 @@ void* my_malloc(const unsigned size_user_data) {
     if (DEBUG) printf("\nSpace needed for new data:                  %lu\n", size_user_data + sizeof(segment_info));
 
     // loop through all alloc_info objects and segments and search for available space
-    bool stop = false;
+    unsigned stop = 0;
     while (ptr_temp_alloc_info && !stop) {
         segment_info* ptr_temp_segment_info = ptr_temp_alloc_info->ptr_head_segment_info;
 
@@ -120,7 +119,7 @@ void* my_malloc(const unsigned size_user_data) {
                 ptr_segment_info->ptr_next->ptr_prev = ptr_segment_info;
 
                 debug_print_segment_info(ptr_segment_info);
-                stop = true;
+                stop = 1;
                 break;
             };
 
