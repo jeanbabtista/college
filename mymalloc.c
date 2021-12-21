@@ -34,7 +34,7 @@ unsigned get_size_rounded(unsigned);
 alloc_info* allocate(unsigned);
 void debug_print_alloc_info(alloc_info*), debug_print_segment_info(segment_info*), debug_print_linked_list();
 
-void* my_malloc(const unsigned size_user_data) {
+void* mymalloc(const unsigned size_user_data) {
     debug_print_h1("--------------------- MY MALLOC ---------------------");
 
     alloc_info* ptr_temp_alloc_info = g_ptr_head_alloc_info;
@@ -176,7 +176,7 @@ void* my_malloc(const unsigned size_user_data) {
     return (void*)ptr_segment_info + sizeof(segment_info);
 }
 
-void my_free(void* ptr_memory) {
+void myfree(void* ptr_memory) {
     debug_print_h1("--------------------- MY FREE ---------------------");
 
     // config
