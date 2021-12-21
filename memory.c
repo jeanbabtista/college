@@ -1,5 +1,31 @@
 #include "memory.h"
 
+typedef enum { false, true } bool;
+#define DEBUG false
+#define debug_print_ptr(msg, addr) if (DEBUG) print_ptr(msg, addr)
+#define debug_print_h1(msg) if (DEBUG) print_h1(msg)
+
+struct segment_info {
+    unsigned size;
+    void* ptr_page;
+
+    struct segment_info
+        * ptr_prev,
+        * ptr_next;
+} typedef segment_info;
+
+struct alloc_info {
+    unsigned size_total;
+
+    segment_info
+        * ptr_head_segment_info,
+        * ptr_tail_segment_info;
+
+    struct alloc_info
+        * ptr_prev,
+        * ptr_next;
+} typedef alloc_info;
+
 // globals
 alloc_info* g_ptr_head_alloc_info = NULL;
 alloc_info* g_ptr_tail_alloc_info = NULL;
@@ -7,11 +33,10 @@ alloc_info* g_ptr_tail_alloc_info = NULL;
 // functions
 unsigned get_size_rounded(unsigned);
 alloc_info* allocate(unsigned);
-void print_alloc_info(alloc_info*), print_segment_info(segment_info*), print_linked_list();
+void debug_print_alloc_info(alloc_info*), debug_print_segment_info(segment_info*), debug_print_linked_list();
 
 void* my_malloc(const unsigned size_user_data) {
-    if (DEBUG)
-        print_h1("--------------------- MY MALLOC ---------------------");
+    debug_print_h1("--------------------- MY MALLOC ---------------------");
 
     alloc_info* ptr_temp_alloc_info = g_ptr_head_alloc_info;
     segment_info* ptr_segment_info;
@@ -25,25 +50,20 @@ void* my_malloc(const unsigned size_user_data) {
         // set head and tail of global alloc_info linked list
         g_ptr_head_alloc_info = g_ptr_tail_alloc_info = ptr_temp_alloc_info;
 
-        if (DEBUG) {
-            print_h1("Creating first alloc_info block");
-            printf("\nAllocated %u bytes\n", size_total);
-            print_alloc_info(ptr_temp_alloc_info);
-        }
+        debug_print_h1("Creating first alloc_info block");
+        if (DEBUG) printf("\nAllocated %u bytes\n", size_total);
+        debug_print_alloc_info(ptr_temp_alloc_info);
     }
+
+    if (DEBUG) printf("\nSpace needed for new data:                  %lu\n", size_user_data + sizeof(segment_info));
 
     // loop through all alloc_info objects and segments and search for available space
     bool stop = false;
-
-    if (DEBUG)
-        printf("\n\t- Space needed for new data:                  %lu\n", size_user_data + sizeof(segment_info));
-
     while (ptr_temp_alloc_info && !stop) {
         segment_info* ptr_temp_segment_info = ptr_temp_alloc_info->ptr_head_segment_info;
 
         if (!ptr_temp_segment_info) {
-            if (DEBUG)
-                print_h1("Creating first segment in current alloc_info");
+            debug_print_h1("Creating first segment in current alloc_info");
 
             // create segment info block
             ptr_segment_info = (segment_info*)(ptr_temp_alloc_info + 1);
@@ -54,21 +74,16 @@ void* my_malloc(const unsigned size_user_data) {
             ptr_segment_info->ptr_prev = ptr_segment_info->ptr_next = NULL;
             ptr_temp_alloc_info->ptr_head_segment_info = ptr_temp_alloc_info->ptr_tail_segment_info = ptr_segment_info;
 
-            if (DEBUG)
-                print_segment_info(ptr_segment_info);
-
+            debug_print_segment_info(ptr_segment_info);
             break;
         }
 
         unsigned size_space = (long unsigned)ptr_temp_segment_info - (long unsigned)ptr_temp_alloc_info - sizeof(alloc_info);
-
-        if (DEBUG)
-            printf("\t- Space between alloc_info and first segment: %u\n", size_space);
+        if (DEBUG) printf("\t- Space between alloc_info and first segment: %u\n", size_space);
 
         // insert at the start
         if (size_space >= size_user_data + sizeof(segment_info)) {
-            if (DEBUG)
-                print_h1("Enough space, inserting segment at the start");
+            debug_print_h1("Enough space, inserting segment at the start");
 
             // create segment info block
             ptr_segment_info = (segment_info*)(ptr_temp_alloc_info + 1);
@@ -81,22 +96,17 @@ void* my_malloc(const unsigned size_user_data) {
             ptr_temp_segment_info->ptr_prev = ptr_segment_info;
             ptr_temp_alloc_info->ptr_head_segment_info = ptr_segment_info;
 
-            if (DEBUG)
-                print_segment_info(ptr_segment_info);
-
+            debug_print_segment_info(ptr_segment_info);
             break;
         };
 
         // insert at the middle
         while (ptr_temp_segment_info->ptr_next) {
             size_space = (long unsigned)(void*)ptr_temp_segment_info->ptr_next - (long unsigned)(void*)ptr_temp_segment_info - ptr_temp_segment_info->size;
-
-            if (DEBUG)
-                printf("\t- Space between this and next segment:        %u\n", size_space);
+            if (DEBUG) printf("\t- Space between this and next segment:        %u\n", size_space);
 
             if (size_space >= size_user_data + sizeof(segment_info)) {
-                if (DEBUG)
-                    print_h1("Enough space, inserting segment at the middle");
+                debug_print_h1("Enough space, inserting segment at the middle");
 
                 // create segment info block
                 ptr_segment_info = (segment_info*)((void*)ptr_temp_segment_info + sizeof(segment_info) + size_user_data);
@@ -109,9 +119,7 @@ void* my_malloc(const unsigned size_user_data) {
                 ptr_temp_segment_info->ptr_next = ptr_segment_info;
                 ptr_segment_info->ptr_next->ptr_prev = ptr_segment_info;
 
-                if (DEBUG)
-                    print_segment_info(ptr_segment_info);
-
+                debug_print_segment_info(ptr_segment_info);
                 stop = true;
                 break;
             };
@@ -123,14 +131,11 @@ void* my_malloc(const unsigned size_user_data) {
             break;
 
         size_space = (long unsigned)ptr_temp_alloc_info + ptr_temp_alloc_info->size_total - ((long unsigned)ptr_temp_alloc_info->ptr_tail_segment_info + ptr_temp_alloc_info->ptr_tail_segment_info->size);
-
-        if (DEBUG)
-            printf("\t- Space left in this block:                   %u\n", size_space);
+        if (DEBUG) printf("\t- Space left in this block:                   %u\n", size_space);
 
         // insert at the end
         if (size_space >= size_user_data + sizeof(segment_info)) {
-            if (DEBUG)
-                print_h1("Enough space, inserting segment at the end");
+            debug_print_h1("Enough space, inserting segment at the end");
 
             // create segment info block
             void* ptr_first_free = (void*)ptr_temp_alloc_info->ptr_tail_segment_info + ptr_temp_alloc_info->ptr_tail_segment_info->size;
@@ -144,9 +149,7 @@ void* my_malloc(const unsigned size_user_data) {
             ptr_temp_alloc_info->ptr_tail_segment_info->ptr_next = ptr_segment_info;
             ptr_temp_alloc_info->ptr_tail_segment_info = ptr_segment_info;
 
-            if (DEBUG)
-                print_segment_info(ptr_segment_info);
-
+            debug_print_segment_info(ptr_segment_info);
             break;
         }
 
@@ -161,117 +164,86 @@ void* my_malloc(const unsigned size_user_data) {
         g_ptr_tail_alloc_info->ptr_next = ptr_alloc_info;
         g_ptr_tail_alloc_info = ptr_alloc_info;
 
-        if (DEBUG) {
-            print_h1("No more space in current alloc_info block, creating new");
-            printf("\nAllocated %u bytes\n", size_total);
-            print_alloc_info(ptr_alloc_info);
-        }
+        debug_print_h1("No more space in current alloc_info block, creating new");
+        if (DEBUG) printf("\nAllocated %u bytes\n", size_total);
+        debug_print_alloc_info(ptr_alloc_info);
 
         ptr_temp_alloc_info = ptr_temp_alloc_info->ptr_next;
     }
 
-    if (DEBUG) {
-        print_h1("Printing global linked list");
-        print_linked_list();
-    }
+    debug_print_h1("Printing global linked list");
+    debug_print_linked_list();
 
-    // return [ address of segment ] + [ size of segment ]
     return (void*)ptr_segment_info + sizeof(segment_info);
 }
 
 void my_free(void* ptr_memory) {
-    if (DEBUG)
-        print_h1("--------------------- MY FREE ---------------------");
+    debug_print_h1("--------------------- MY FREE ---------------------");
 
     // config
     void* ptr_data = ptr_memory - sizeof(segment_info);
     segment_info* ptr_segment_info = (segment_info*)ptr_data;
     alloc_info* ptr_alloc_info = (alloc_info*)ptr_segment_info->ptr_page;
 
-    if (DEBUG) {
-        print_h1("Freeing segment");
-        print_ptr("\t- address:    ", ptr_segment_info);
-        print_ptr("\t- alloc_info: ", ptr_alloc_info);
-        // printf("\t- alloc size: %u\n", ptr_alloc_info->size_actual);
-    }
+    debug_print_h1("Freeing segment");
+    debug_print_ptr("\t- address:    ", ptr_segment_info);
+    debug_print_ptr("\t- alloc_info: ", ptr_alloc_info);
 
     // remove segment from linked list
     if (!ptr_segment_info->ptr_prev && !ptr_segment_info->ptr_next) {
-        if (DEBUG)
-            print_h1("Deleting the only segment left");
-
+        debug_print_h1("Deleting the only segment left");
         ptr_alloc_info->ptr_head_segment_info = ptr_alloc_info->ptr_tail_segment_info = NULL;
     }
     else if (!ptr_segment_info->ptr_prev) {
-        if (DEBUG)
-            print_h1("Deleting first segment");
-
+        debug_print_h1("Deleting first segment");
         ptr_alloc_info->ptr_head_segment_info = ptr_segment_info->ptr_next;
         ptr_segment_info->ptr_next = ptr_segment_info->ptr_next->ptr_prev = NULL;
     }
     else if (!ptr_segment_info->ptr_next) {
-        if (DEBUG)
-            print_h1("Deleting last segment");
-
+        debug_print_h1("Deleting last segment");
         ptr_alloc_info->ptr_tail_segment_info = ptr_segment_info->ptr_prev;
         ptr_segment_info->ptr_prev = ptr_segment_info->ptr_prev->ptr_next = NULL;
     }
     else {
-        if (DEBUG)
-            print_h1("Deleting middle segment");
-
+        debug_print_h1("Deleting middle segment");
         ptr_segment_info->ptr_next->ptr_prev = ptr_segment_info->ptr_prev;
         ptr_segment_info->ptr_prev->ptr_next = ptr_segment_info->ptr_next;
         ptr_segment_info->ptr_next = ptr_segment_info->ptr_prev = NULL;
     }
 
-    // update size
-    // ptr_alloc_info->size_actual -= ptr_segment_info->size;
-
     // if no segments, deallocate memory
     if (!ptr_alloc_info->ptr_head_segment_info && !ptr_alloc_info->ptr_tail_segment_info) {
         // remove alloc_info from global linked list
         if (!ptr_alloc_info->ptr_prev && !ptr_alloc_info->ptr_next) {
-            if (DEBUG)
-                print_h1("Deleting the only alloc_info left");
-
+            debug_print_h1("Deleting the only alloc_info left");
             g_ptr_head_alloc_info = g_ptr_tail_alloc_info = NULL;
         }
         else if (!ptr_alloc_info->ptr_prev) {
-            if (DEBUG)
-                print_h1("Deleting first alloc_info");
-
+            debug_print_h1("Deleting first alloc_info");
             g_ptr_head_alloc_info = ptr_alloc_info->ptr_next;
             ptr_alloc_info->ptr_next = ptr_alloc_info->ptr_next->ptr_prev = NULL;
         }
         else if (!ptr_alloc_info->ptr_next) {
-            if (DEBUG)
-                print_h1("Deleting last alloc_info");
-
+            debug_print_h1("Deleting last alloc_info");
             g_ptr_tail_alloc_info = ptr_alloc_info->ptr_prev;
             ptr_alloc_info->ptr_prev = ptr_alloc_info->ptr_prev->ptr_next = NULL;
         }
         else {
-            if (DEBUG)
-                print_h1("Deleting middle alloc_info");
-
+            debug_print_h1("Deleting middle alloc_info");
             ptr_alloc_info->ptr_next->ptr_prev = ptr_alloc_info->ptr_prev;
             ptr_alloc_info->ptr_prev->ptr_next = ptr_alloc_info->ptr_next;
             ptr_alloc_info->ptr_next = ptr_alloc_info->ptr_prev = NULL;
         }
 
         const int result = munmap((void*)ptr_alloc_info, ptr_alloc_info->size_total);
-        if (result == -1)
+        if (result == -1 && DEBUG)
             perror("munmap");
 
-        if (DEBUG)
-            print_h1("Memory unmapped");
+        debug_print_h1("Memory unmapped");
     }
 
-    if (DEBUG) {
-        print_h1("Updated global linked list:");
-        print_linked_list();
-    }
+    debug_print_h1("Updated global linked list:");
+    debug_print_linked_list();
 }
 
 unsigned get_size_rounded(unsigned size_user_data) {
@@ -296,23 +268,32 @@ alloc_info* allocate(const unsigned size_total) {
     return ptr_alloc_info;
 }
 
-void print_alloc_info(alloc_info* ptr_alloc_info) {
+void debug_print_alloc_info(alloc_info* ptr_alloc_info) {
+    if (!DEBUG)
+        return;
+
     printf("\t- total size:           %u\n", ptr_alloc_info->size_total);
     print_ptr("\t- head segment pointer: ", ptr_alloc_info->ptr_head_segment_info);
     print_ptr("\t- tail segment pointer: ", ptr_alloc_info->ptr_tail_segment_info);
 }
 
-void print_segment_info(segment_info* ptr_segment_info) {
+void debug_print_segment_info(segment_info* ptr_segment_info) {
+    if (!DEBUG)
+        return;
+
     printf("\t* actual size:        %u, sizeof(segment_info): %lu\n", ptr_segment_info->size, sizeof(segment_info));
     print_ptr("\t* pointer to page:    ", ptr_segment_info->ptr_page);
     print_ptr("\t* first free:         ", (long)((void*)ptr_segment_info + ptr_segment_info->size) % (10u * 10 * 10 * 10 * 10));
 }
 
-void print_linked_list() {
+void debug_print_linked_list() {
+    if (!DEBUG)
+        return;
+
     alloc_info* ptr_alloc_info = g_ptr_head_alloc_info;
     while (ptr_alloc_info) {
         print_ptr("\t- current address:      ", ptr_alloc_info);
-        print_alloc_info(ptr_alloc_info);
+        debug_print_alloc_info(ptr_alloc_info);
         print_ptr("\t- prev alloc_info:      ", ptr_alloc_info->ptr_prev);
         print_ptr("\t- next alloc_info:      ", ptr_alloc_info->ptr_next);
 
