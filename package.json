@@ -1,0 +1,21 @@
+{
+  "name": "mur-node-blockchain",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeanbabtista/vaje.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jeanbabtista/vaje/issues"
+  },
+  "homepage": "https://github.com/jeanbabtista/vaje#readme"
+}
