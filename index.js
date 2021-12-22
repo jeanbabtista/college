@@ -1,13 +1,7 @@
-import Block from './models/Block.js'
+import Blockchain from './models/Blockchain.js'
+const blockchain = new Blockchain()
 
-const data = {
-  name: 'Zan',
-  message: 'Hello World!',
-  toString() {
-    return `${this.name}, ${this.message}`
-  },
-}
+blockchain.addBlock('2nd block')
+blockchain.addBlock('3rd block')
 
-const b = new Block(0, data, null)
-
-b.print()
+blockchain.print()
