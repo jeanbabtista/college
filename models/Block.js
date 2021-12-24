@@ -1,46 +1,51 @@
-import SHA256 from 'crypto-js/sha256.js'
+import crypto from 'crypto'
 
 class Block {
-  constructor(index, data, previousHash) {
+  constructor(index, data, difficulty, previousHash) {
     this.index = index
     this.data = data
     this.timestamp = Date.now()
-    this.hash = this.calculateHash()
-    this.previousHash = previousHash
+    this.nonce = 0
+    this.difficulty = difficulty
+    this.previousHash = previousHash || '0'
+    this.hash = '0'
   }
 
-  calculateHash(nonce = 0, difficulty = 0) {
-    return SHA256(
-      this.index +
-        this.timestamp +
-        this.data +
-        this.previousHash +
-        nonce +
-        difficulty
-    ).toString()
-  }
+  computeHash = () =>
+    crypto
+      .createHash('sha256')
+      .update(
+        this.index + this.timestamp + this.data + this.previousHash + this.nonce + this.difficulty
+      )
+      .digest('hex')
 
-  isValidHash(hash, difficulty) {
-    return hash.substring(0, difficulty) === Array(difficulty + 1).join('0')
-  }
+  isValidHash = () =>
+    this.hash.substring(0, this.difficulty) === Array(this.difficulty + 1).join('0')
 
-  isValidProof(nonce) {
-    const guessHash = this.calculateHash(nonce)
-    return guessHash === this.hash
-  }
+  /* brute-force POW algorithm to mine blocks */
+  mine = async () =>
+    new Promise((resolve) =>
+      setImmediate(() => {
+        while (!this.isValidHash(this.difficulty)) {
+          this.nonce++
+          this.hash = this.computeHash(this.difficulty)
+        }
 
-  mine(difficulty) /* POW */ {
-    let nonce = 0
+        resolve('New block mined.')
+      })
+    )
 
-    while (true) {
-      const hash = this.calculateHash(nonce, difficulty)
-      if (this.isValidHash(hash, difficulty)) break
-      nonce++
-    }
-  }
+  print = () => {
+    const substringPosition = 10
 
-  print() {
-    console.log(`[Block #${this.index}]: ${this.data}`)
+    console.log('\t↑')
+    console.log(`[ Block #${this.index} ]`)
+    console.log(
+      'prev:',
+      this.previousHash === '0' ? '\t0' : this.previousHash.substring(0, substringPosition)
+    )
+    console.log('data:', this.data)
+    console.log('hash:', this.hash.substring(0, substringPosition))
   }
 }
 
