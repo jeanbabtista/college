@@ -9,59 +9,42 @@ const blockGenerationInterval = 10 // new block will generate every 10 seconds
 const difficultyAdjustInterval = 10 // difficulty will adjust every 10 blocks
 
 class Blockchain {
+  #generator
+
   constructor() {
-    this.chain = [new Block(0, 'Genesis block')]
+    this.chain = [new Block()]
+    this.nodes = new Map()
     this.difficulty = 4
-    this.generator = id()
+    this.#generator = id()
+
     setInterval(this.handleSync, blockGenerationInterval * 1000)
   }
 
-  get index() {
-    return this.generator.next().value
-  }
+  getIndex = () => this.#generator.next().value
+  getLastBlock = () => this.chain[this.chain.length - 1]
 
-  get length() {
-    return this.chain.length
-  }
+  addNode = (url, socket) => this.nodes.set(url, socket)
 
-  get lastBlock() {
-    return this.chain[this.chain.length - 1]
-  }
-
-  handleSync = () => {
-    if (this.length <= difficultyAdjustInterval) return
-
-    const prevAdjustBlock = this.chain[this.length - difficultyAdjustInterval]
-    const timeExpected = blockGenerationInterval * difficultyAdjustInterval
-    const timeTaken = (this.lastBlock.timestamp - prevAdjustBlock.timestamp) / 1000
-
-    if (timeTaken < timeExpected / 2) this.difficulty = prevAdjustBlock.difficulty + 1
-    else if (timeTaken > timeExpected / 2) this.difficulty = prevAdjustBlock.difficulty - 1
-    else this.difficulty = prevAdjustBlock.difficulty
-
-    console.log('\nDifficulty updated to', this.difficulty)
-  }
-
-  addBlock = (data) =>
+  addBlock = async (block) =>
     new Promise((resolve) => {
-      const block = new Block(this.index, data, this.difficulty, this.lastBlock.hash)
-      block.mine(this.difficulty).then(() => {
-        this.chain.push(block)
-        block.print()
-        resolve()
-      })
+      block.setIndex(this.getIndex())
+      block.setDifficulty(this.difficulty)
+      block.setPreviousHash(this.getLastBlock().hash)
+      block.mine(this.difficulty)
 
+      this.chain.push(block)
+      block.print()
       console.log(`Chain is ${this.isValid() ? '' : 'in'}valid.`)
-    })
 
-  addNode = (node) => this.nodes.push(node)
+      resolve()
+    })
 
   print = () => {
     for (const block of this.chain) block.print()
   }
 
   isValid = () => {
-    for (let i = 1; i < this.length; i++) {
+    for (let i = 1; i < this.chain.length; i++) {
       const currBlock = this.chain[i]
       const prevBlock = this.chain[i - 1]
 
@@ -77,16 +60,30 @@ class Blockchain {
   }
 
   trySetChain = (chain) => {
-    const thisCumulativeDifficulty = this.chain.reduce(
-      (acc, block) => acc + 2 ** block.difficulty,
-      0
-    )
-    const otherCumulativeDifficulty = chain.reduce(
-      (accumulator, block) => accumulator + 2 ** block.difficulty,
-      0
-    )
+    const calculateCumulativeDifficulty = (chain) =>
+      chain.reduce((acc, block) => acc + 2 ** block.getDifficulty(), 0)
 
-    if (thisCumulativeDifficulty < otherCumulativeDifficulty) this.chain = chain
+    const thisDiff = calculateCumulativeDifficulty(this.chain)
+    const otherDiff = calculateCumulativeDifficulty(chain)
+
+    if (thisDiff < otherDiff) this.chain = chain
+  }
+
+  handleSync = () => {
+    if (this.chain.length <= difficultyAdjustInterval) return
+
+    const prevAdjustBlock = this.chain[this.chain.length - difficultyAdjustInterval]
+    const timeExpected = blockGenerationInterval * difficultyAdjustInterval
+    const timeTaken = (this.getLastBlock().timestamp - prevAdjustBlock.timestamp) / 1000
+
+    this.difficulty =
+      timeTaken < timeExpected / 2
+        ? prevAdjustBlock.difficulty + 1
+        : timeTaken > timeExpected / 2
+        ? prevAdjustBlock.difficulty - 1
+        : prevAdjustBlock.difficulty
+
+    console.log('\nDifficulty updated to', this.difficulty)
   }
 }
 

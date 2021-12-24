@@ -1,21 +1,22 @@
 import crypto from 'crypto'
 
 class Block {
-  constructor(index, data, difficulty, previousHash) {
-    this.index = index
+  constructor(data = '') {
+    this.nonce = 0
+    this.hash = '0'
     this.data = data
     this.timestamp = Date.now()
-    this.nonce = 0
-    this.difficulty = difficulty
-    this.previousHash = previousHash || '0'
-    this.hash = '0'
   }
+
+  setIndex = (index) => (this.index = index)
+  setDifficulty = (difficulty) => (this.difficulty = difficulty)
+  setPreviousHash = (previousHash) => (this.previousHash = previousHash)
 
   computeHash = () =>
     crypto
       .createHash('sha256')
       .update(
-        this.index + this.timestamp + this.data + this.previousHash + this.nonce + this.difficulty
+        `${this.index}${this.timestamp}${this.data}${this.previousHash}${this.nonce}${this.difficulty}`
       )
       .digest('hex')
 
