@@ -2,7 +2,11 @@ import Blockchain from './models/Blockchain.js'
 const blockchain = new Blockchain()
 
 const mine = async () => {
-  while (true) await blockchain.addBlock('block')
+  let i = 0
+  while (i < 50) {
+    await blockchain.addBlock('block')
+    i++
+  }
 }
 
 mine()

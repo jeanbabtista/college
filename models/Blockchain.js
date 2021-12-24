@@ -75,6 +75,19 @@ class Blockchain {
 
     return true
   }
+
+  trySetChain = (chain) => {
+    const thisCumulativeDifficulty = this.chain.reduce(
+      (acc, block) => acc + 2 ** block.difficulty,
+      0
+    )
+    const otherCumulativeDifficulty = chain.reduce(
+      (accumulator, block) => accumulator + 2 ** block.difficulty,
+      0
+    )
+
+    if (thisCumulativeDifficulty < otherCumulativeDifficulty) this.chain = chain
+  }
 }
 
 export default Blockchain
