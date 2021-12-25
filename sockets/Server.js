@@ -7,7 +7,7 @@ import actions from './actions.js'
 // config
 export const app = express()
 export const server = createServer(app)
-export const io = new SocketServer(server)
+const io = new SocketServer(server)
 
 // middleware
 app.use(express.json())

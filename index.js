@@ -1,7 +1,7 @@
 // models
 import Block from './models/Block.js'
 import Blockchain from './models/Blockchain.js'
-import Server, { app, server, io } from './sockets/Server.js'
+import Server, { app, server } from './sockets/Server.js'
 import Client from './sockets/Client.js'
 import { exit } from 'process'
 import actions from './sockets/actions.js'
@@ -18,9 +18,8 @@ const blockchain = new Blockchain()
 const serverSocket = new Server(port, blockchain)
 
 // helpers
-const getResponse = (error, message) => ({ error, message })
 console.log('[ CONFIG ]')
-console.log('# URL:', `http://localhost:${port}/chain\n`)
+console.log('# URL:', serverSocket.url)
 
 const mine = async () => {
   let i = 0
