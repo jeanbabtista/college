@@ -13,7 +13,6 @@ class Blockchain {
 
   constructor() {
     this.chain = [new Block()]
-    this.nodes = new Map()
     this.difficulty = 4
     this.#generator = id()
 
@@ -22,8 +21,6 @@ class Blockchain {
 
   getIndex = () => this.#generator.next().value
   getLastBlock = () => this.chain[this.chain.length - 1]
-
-  addNode = (url, socket) => this.nodes.set(url, socket)
 
   addBlock = async (block) =>
     new Promise((resolve) => {

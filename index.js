@@ -1,48 +1,26 @@
-import express from 'express'
-// import { createServer } from 'http'
-// import { Server } from 'socket.io'
-// import ioClient from 'socket.io-client'
-
 // models
 import Block from './models/Block.js'
 import Blockchain from './models/Blockchain.js'
-import Server, { port } from './sockets/Server.js'
-// import createSocket from './sockets/index.js'
+import Server, { app, server, io } from './sockets/Server.js'
+import Client from './sockets/Client.js'
+import { exit } from 'process'
+import actions from './sockets/actions.js'
+
+// parse arguments
+if (process.argv.length !== 3) {
+  console.info('Format must be: node index.js <port>')
+  exit(-1)
+}
 
 // config
-const app = express()
-// const server = createServer(app)
-// const ioServer = new Server(server)
+const port = process.argv[2]
 const blockchain = new Blockchain()
-const server = new Server(blockchain)
+const serverSocket = new Server(port, blockchain)
 
-// variables
-const httpPort = port - 1000
-const url = `http://localhost:${httpPort}`
-blockchain.addNode(url, 'socket node')
-
-// middleware
-app.use(express.json())
-
-// routes
-app.get('/chain', (_req, res) => res.json(blockchain.chain))
-
-app.post('/add_node', (req, res) => {
-  const { port } = req.body
-  const url = `http://localhost:${port}`
-
-  blockchain.addNode(url, 'socket node')
-  res.json({ error: null, message: 'Successfully added node.' })
-})
-
-app.post('/mine', async (req, res) => {
-  try {
-    await blockchain.addBlock(new Block({ from: 'zan', to: 'mafija', amount: 100 }))
-    res.json({ error: false, message: 'Successfully added new block to the blockchain.' })
-  } catch (e) {
-    res.json({ error: true, message: e.message })
-  }
-})
+// helpers
+const getResponse = (error, message) => ({ error, message })
+console.log('[ CONFIG ]')
+console.log('# URL:', `http://localhost:${port}/chain\n`)
 
 const mine = async () => {
   let i = 0
@@ -52,6 +30,31 @@ const mine = async () => {
   }
 }
 
-// mine()
+// routes
+app.get('/chain', (_req, res) => res.json(blockchain.chain))
+app.get('/nodes', (_req, res) => res.json(serverSocket.getNodes()))
 
-app.listen(httpPort, () => console.log(`${url}/chain`))
+app.post('/nodes/add', (req, res) => {
+  const { port } = req.body
+  const node = new Client(port)
+
+  node.socket.on(actions.JOIN_SERVER, () => {
+    if (!node.socket.connected) return res.json(getResponse(true, 'Cannot connect to the client.'))
+
+    node.message('Connected.')
+    res.json(getResponse(null, `Successfully added node [ ${node.url} ]`))
+  })
+
+  serverSocket.addNode(port, node)
+})
+
+app.post('/mine', async (_req, res) => {
+  try {
+    await blockchain.addBlock(new Block({ from: 'zan', to: 'mafija', amount: 100 }))
+    res.json({ error: false, message: 'Successfully added new block to the blockchain.' })
+  } catch (e) {
+    res.json({ error: true, message: e.message })
+  }
+})
+
+server.listen(port)

@@ -1,39 +1,37 @@
-import WebSocket, { WebSocketServer } from 'ws'
-import { exit } from 'process'
+import express from 'express'
+import { createServer } from 'http'
+import { Server as SocketServer } from 'socket.io'
+import cors from 'cors'
+import actions from './actions.js'
 
-// parse arguments
-if (process.argv.length < 3) {
-  console.log('Format must be: node index.js <server port> [[peer 1 port] peer 2 port] ...')
-  exit(-1)
-}
+// config
+export const app = express()
+export const server = createServer(app)
+export const io = new SocketServer(server)
 
-export const port = process.argv[2]
-const peers = process.argv.slice(3).map((peer) => `ws://localhost:${peer}`)
+// middleware
+app.use(express.json())
+app.use(cors())
 
 class Server {
-  constructor(blockchain) {
+  constructor(port, blockchain) {
     this.blockchain = blockchain
-    this.sockets = []
-    this.listen(port)
+    this.port = port
+    this.url = `http://localhost:${port}`
+    this.nodes = new Map()
+    this.listen()
   }
 
-  handleSocket = (socket) => {
-    this.sockets.push(socket)
-    console.log('[ Client connected ]')
-  }
+  addNode = (port, clientSocket) => this.nodes.set(port, clientSocket)
+  getNodes = () =>
+    Array.from(this.nodes, ([port, clientSocket]) => ({ port, url: clientSocket.url }))
 
-  handlePeerConnection = () => {
-    peers.forEach((peer) => {
-      const socket = new WebSocket(peer)
-      socket.on('peer-connect', () => this.handleSocket(socket))
+  message = (message) => console.log(`[ Server|${this.port} ]: ${message}`)
+
+  listen = () =>
+    io.on('connection', (socket) => {
+      socket.emit(actions.JOIN_SERVER)
     })
-  }
-
-  listen = (port) => {
-    const server = new WebSocketServer({ port })
-    server.on('connection', this.handleSocket)
-    this.handlePeerConnection()
-  }
 }
 
 export default Server
