@@ -20,10 +20,11 @@ import Notification from 'components/Notifications'
 import { PeerContext } from 'components/App'
 
 // api
-import { postAddNode } from 'api/addNode'
+import { postAddNode } from 'api/nodes'
+import { getChain } from 'api/chain'
 
 const Card = ({ id, port }) => {
-  const { peers, setPeers, connections } = useContext(PeerContext)
+  const { peers, setPeers, connections, chains, setChains } = useContext(PeerContext)
   const [value, setValue] = useState(port)
   const [loading, setLoading] = useState(false)
 
@@ -35,26 +36,43 @@ const Card = ({ id, port }) => {
     )
   }
 
-  const handleConnectPeers = async (e) => {
-    const connectionsToConnect = connections
+  const handleConnectPeers = async () => {
+    setLoading(true)
+
+    const connectionPorts = connections
       .find((connection) => connection.port === port)
       .to.filter((connection) => connection.port !== port && connection.connected)
       .map((connection) => connection.port)
 
-    console.log(`Port ${port} connecting to [${connectionsToConnect.join(', ')}] ...`)
+    // console.log(`Port ${port} connecting to [${connectionPorts.join(', ')}] ...`)
 
-    connectionsToConnect.forEach(async (portTo) => {
-      setLoading(true)
+    // get initial blockchain for current peer port
+    try {
+      const found = chains.find((chain) => chain.port === port)
+      const fetchedChain = await getChain(port)
 
-      try {
+      setChains(
+        found
+          ? chains.map((chain) => (chain.port === port ? { ...chain, chain: fetchedChain } : chain))
+          : [...chains, { port, chain: fetchedChain }]
+      )
+
+      toast.success('Successfully fetched blockchain')
+    } catch (e) {
+      toast.error(e.message)
+    }
+
+    // add peer nodes to the server
+    try {
+      for (const portTo of connectionPorts) {
         const response = await postAddNode(port, portTo)
-        toast.success(response)
-      } catch (e) {
-        toast.error(e.message)
-      } finally {
-        setLoading(false)
+        toast.success(response.data.message)
       }
-    })
+    } catch (e) {
+      toast.error(e.message)
+    }
+
+    setLoading(false)
   }
 
   return (
@@ -76,7 +94,7 @@ const Card = ({ id, port }) => {
         </CardContent>
 
         <CardActions>
-          <LoadingButton loading={loading} variant="contained" onClick={handleConnectPeers}>
+          <LoadingButton loading={loading} variant="outlined" onClick={handleConnectPeers}>
             Connect
           </LoadingButton>
         </CardActions>

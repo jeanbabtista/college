@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createContext } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import axios from 'axios'
 
 // styling
 import { Container, CssBaseline } from '@mui/material'
@@ -14,6 +15,7 @@ import Mine from 'components/Mine'
 
 // context
 export const PeerContext = createContext()
+axios.defaults.timeout = 5000
 
 // theme
 const theme = createTheme({
@@ -22,53 +24,26 @@ const theme = createTheme({
   },
 })
 
-/* --- peer structure ---
-peer: Object {
-  id: int
-  port: int
-}
-
-connection: Array [
-  {
-    port: int
-    to: Array [
-      { port: int, connected: Bool }
-      { port: int, connected: Bool }
-      ...
-    ]
-  }
-]
-*/
-
 const App = () => {
   const [numberOfPeers, setNumberOfPeers] = useState(3)
   const [peers, setPeers] = useState([])
   const [connections, setConnections] = useState([])
+  const [chains, setChains] = useState([])
 
-  useEffect(
-    () => setPeers([...Array(numberOfPeers)].map((_, i) => ({ id: i + 1, port: 5000 + i }))),
-    [numberOfPeers]
-  )
+  useEffect(() => {
+    setChains([])
+    setPeers([...Array(numberOfPeers)].map((_, i) => ({ id: i + 1, port: 5000 + i })))
+  }, [numberOfPeers])
 
-  useEffect(
-    () =>
-      setConnections(
-        peers.map((peer) => ({
-          port: peer.port,
-          to: peers.map((p) => ({ port: p.port, connected: p.id === peer.id })),
-        }))
-      ),
-    [peers]
-  )
-
-  /* useEffect(() => {
-    console.log('Available connections:')
-    connections.forEach(({ port: from, to }) =>
-      to.forEach(
-        ({ port: to, connected }) => connected && from !== to && console.log(`${from} -> ${to}`)
-      )
+  useEffect(() => {
+    setChains([])
+    setConnections(
+      peers.map((peer) => ({
+        port: peer.port,
+        to: peers.map((p) => ({ port: p.port, connected: p.id === peer.id })),
+      }))
     )
-  }, [connections]) */
+  }, [peers])
 
   const contextData = {
     numberOfPeers,
@@ -77,7 +52,9 @@ const App = () => {
     setPeers,
     connections,
     setConnections,
-    navlinks: ['peers', 'mine', 'dashboard'],
+    chains,
+    setChains,
+    navlinks: ['peers', 'dashboard'],
   }
 
   return (
