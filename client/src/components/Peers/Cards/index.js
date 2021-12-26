@@ -4,23 +4,23 @@ import React, { useContext } from 'react'
 import { Grid } from '@mui/material'
 
 // components
-import PeerInput from './PeerInput'
+import Card from './Card'
 
 // context
 import { PeerContext } from 'components/App'
 
-const PeersInput = () => {
+const Cards = () => {
   const { peers } = useContext(PeerContext)
 
   return (
     <Grid container mt={5} spacing={4}>
       {peers.map((peer, i) => (
         <Grid item key={i}>
-          <PeerInput index={peer.index} />
+          <Card {...peer} />
         </Grid>
       ))}
     </Grid>
   )
 }
 
-export default PeersInput
+export default Cards

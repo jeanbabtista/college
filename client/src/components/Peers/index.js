@@ -4,15 +4,15 @@ import React from 'react'
 import { Typography } from '@mui/material'
 
 // components
-import PeersSlider from './PeersSlider'
-import PeersInput from './PeersInput'
+import Slider from './Slider'
+import Cards from './Cards'
 
 const Peers = () => {
   return (
     <>
       <Typography variant="h3">Peers</Typography>
-      <PeersSlider />
-      <PeersInput />
+      <Slider />
+      <Cards />
     </>
   )
 }

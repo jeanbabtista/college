@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 
 // styles
-import { Box, Slider, Typography, Grid, Input } from '@mui/material'
+import { Box, Slider as MuiSlider, Typography, Grid, Input } from '@mui/material'
 
 // context
 import { PeerContext } from 'components/App'
@@ -10,7 +10,7 @@ import { PeerContext } from 'components/App'
 const MIN_PEERS = 0
 const MAX_PEERS = 12
 
-const PeersSlider = () => {
+const Slider = () => {
   const { numberOfPeers, setNumberOfPeers } = useContext(PeerContext)
 
   const handleSliderChange = (_e, newValue) => setNumberOfPeers(newValue)
@@ -25,7 +25,7 @@ const PeersSlider = () => {
       <Typography gutterBottom>Number of peers</Typography>
       <Grid container spacing={2} alignItems="center">
         <Grid item xs>
-          <Slider
+          <MuiSlider
             value={numberOfPeers}
             onChange={handleSliderChange}
             marks
@@ -51,4 +51,4 @@ const PeersSlider = () => {
   )
 }
 
-export default PeersSlider
+export default Slider
