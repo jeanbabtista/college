@@ -6,18 +6,14 @@ import { Box, Slider as MuiSlider, Typography, Grid, Input } from '@mui/material
 // context
 import { PeerContext } from 'components/App'
 
-// config
-const MIN_PEERS = 0
-const MAX_PEERS = 12
-
-const Slider = () => {
+const Slider = ({ minPeers, maxPeers }) => {
   const { numberOfPeers, setNumberOfPeers } = useContext(PeerContext)
 
   const handleSliderChange = (_e, newValue) => setNumberOfPeers(newValue)
   const handleInputChange = (e) => setNumberOfPeers(!e.target.value ? '' : Number(e.target.value))
   const handleBlur = () =>
     setNumberOfPeers(
-      numberOfPeers < MIN_PEERS ? MIN_PEERS : numberOfPeers > MAX_PEERS ? MAX_PEERS : numberOfPeers
+      numberOfPeers < minPeers ? maxPeers : numberOfPeers > maxPeers ? maxPeers : numberOfPeers
     )
 
   return (
@@ -29,8 +25,8 @@ const Slider = () => {
             value={numberOfPeers}
             onChange={handleSliderChange}
             marks
-            min={MIN_PEERS}
-            max={MAX_PEERS}
+            min={minPeers}
+            max={maxPeers}
           />
         </Grid>
         <Grid item>
@@ -40,8 +36,8 @@ const Slider = () => {
             onBlur={handleBlur}
             inputProps={{
               step: 1,
-              min: MIN_PEERS,
-              max: MAX_PEERS,
+              min: minPeers,
+              max: maxPeers,
               type: 'number',
             }}
           />

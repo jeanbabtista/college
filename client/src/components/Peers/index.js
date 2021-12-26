@@ -11,7 +11,7 @@ const Peers = () => {
   return (
     <>
       <Typography variant="h3">Peers</Typography>
-      <Slider />
+      <Slider minPeers={2} maxPeers={10} />
       <Cards />
     </>
   )
