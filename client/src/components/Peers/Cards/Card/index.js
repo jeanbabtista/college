@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react'
+import { toast } from 'react-toastify'
 
 // styles
 import {
@@ -8,18 +9,23 @@ import {
   CardActions,
   Typography,
   TextField,
-  Button,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 
 // components
 import Checkboxes from './Checkboxes'
+import Notification from 'components/Notifications'
 
 // context
 import { PeerContext } from 'components/App'
 
+// api
+import { postAddNode } from 'api/addNode'
+
 const Card = ({ id, port }) => {
   const { peers, setPeers, connections } = useContext(PeerContext)
   const [value, setValue] = useState(port)
+  const [loading, setLoading] = useState(false)
 
   const handleOnChange = (e) => {
     const newPort = parseInt(e.target.value)
@@ -29,13 +35,26 @@ const Card = ({ id, port }) => {
     )
   }
 
-  const handleConnectPeers = (e) => {
-    console.log('Available connections:')
-    connections.forEach(({ port: from, to }) =>
-      to.forEach(
-        ({ port: to, connected }) => connected && from !== to && console.log(`${from} -> ${to}`)
-      )
-    )
+  const handleConnectPeers = async (e) => {
+    const connectionsToConnect = connections
+      .find((connection) => connection.port === port)
+      .to.filter((connection) => connection.port !== port && connection.connected)
+      .map((connection) => connection.port)
+
+    console.log(`Port ${port} connecting to [${connectionsToConnect.join(', ')}] ...`)
+
+    connectionsToConnect.forEach(async (portTo) => {
+      setLoading(true)
+
+      try {
+        const response = await postAddNode(port, portTo)
+        toast.success(response)
+      } catch (e) {
+        toast.error(e.message)
+      } finally {
+        setLoading(false)
+      }
+    })
   }
 
   return (
@@ -57,11 +76,13 @@ const Card = ({ id, port }) => {
         </CardContent>
 
         <CardActions>
-          <Button variant="contained" onClick={handleConnectPeers}>
+          <LoadingButton loading={loading} variant="contained" onClick={handleConnectPeers}>
             Connect
-          </Button>
+          </LoadingButton>
         </CardActions>
       </MuiCard>
+
+      <Notification />
     </Box>
   )
 }
