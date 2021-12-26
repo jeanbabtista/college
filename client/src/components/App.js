@@ -22,28 +22,28 @@ const theme = createTheme({
   },
 })
 
+/* --- peer structure ---
+peer: Object {
+  id: int
+  port: int
+}
+
+connection: Array [
+  {
+    port: int
+    to: Array [
+      { port: int, connected: Bool }
+      { port: int, connected: Bool }
+      ...
+    ]
+  }
+]
+*/
+
 const App = () => {
-  const [numberOfPeers, setNumberOfPeers] = useState(1)
+  const [numberOfPeers, setNumberOfPeers] = useState(3)
   const [peers, setPeers] = useState([])
   const [connections, setConnections] = useState([])
-
-  /* --- peer structure ---
-  peer: Object {
-    id: int
-    port: int
-  }
-
-  connection: Array [
-    {
-      port: int
-      to: Array [
-        { port: int, connected: Bool }
-        { port: int, connected: Bool }
-        ...
-      ]
-    }
-  ]
-  */
 
   useEffect(
     () => setPeers([...Array(numberOfPeers)].map((_, i) => ({ id: i + 1, port: 5000 + i }))),
@@ -61,14 +61,14 @@ const App = () => {
     [peers]
   )
 
-  useEffect(() => {
+  /* useEffect(() => {
     console.log('Available connections:')
     connections.forEach(({ port: from, to }) =>
       to.forEach(
         ({ port: to, connected }) => connected && from !== to && console.log(`${from} -> ${to}`)
       )
     )
-  }, [connections])
+  }, [connections]) */
 
   const contextData = {
     numberOfPeers,

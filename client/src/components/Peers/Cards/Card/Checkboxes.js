@@ -34,6 +34,12 @@ const Checkboxes = ({ id, port }) => {
     )
   }
 
+  /* // debug Checkbox checked value
+  const getCheckedValue = connections
+    .find((connection) => connection.port === port)
+    ?.to.filter((connection) => connection.port !== port)
+  console.log(port, '->', getCheckedValue) */
+
   return (
     <FormControl>
       <FormLabel component="legend" sx={{ mt: 3 }}>
@@ -46,7 +52,17 @@ const Checkboxes = ({ id, port }) => {
               key={i}
               label={`Connect to ${peer.port}`}
               name={`${peer.port}`}
-              control={<Checkbox onChange={handleChange} />}
+              control={
+                <Checkbox
+                  checked={
+                    connections
+                      .find((connection) => connection.port === port)
+                      ?.to.filter((connection) => connection.port !== port)
+                      ?.find((connection) => connection.port === peer.port)?.connected ?? false
+                  }
+                  onChange={handleChange}
+                />
+              }
             />
           ) : (
             <Box key={i} sx={{ width: 0, height: 0 }} />

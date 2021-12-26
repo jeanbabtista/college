@@ -18,7 +18,7 @@ import Checkboxes from './Checkboxes'
 import { PeerContext } from 'components/App'
 
 const Card = ({ id, port }) => {
-  const { peers, setPeers } = useContext(PeerContext)
+  const { peers, setPeers, connections } = useContext(PeerContext)
   const [value, setValue] = useState(port)
 
   const handleOnChange = (e) => {
@@ -29,7 +29,14 @@ const Card = ({ id, port }) => {
     )
   }
 
-  const handleConnectPeers = (e) => {}
+  const handleConnectPeers = (e) => {
+    console.log('Available connections:')
+    connections.forEach(({ port: from, to }) =>
+      to.forEach(
+        ({ port: to, connected }) => connected && from !== to && console.log(`${from} -> ${to}`)
+      )
+    )
+  }
 
   return (
     <Box sx={{ width: 250 }}>
