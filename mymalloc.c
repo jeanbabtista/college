@@ -34,8 +34,10 @@ unsigned get_size_rounded(unsigned);
 alloc_info* allocate(unsigned);
 void debug_print_alloc_info(alloc_info*), debug_print_segment_info(segment_info*), debug_print_linked_list();
 
-void* mymalloc(const unsigned size_user_data) {
+void* mymalloc(const int size_user_data) {
     debug_print_h1("--------------------- MY MALLOC ---------------------");
+
+    if (size_user_data < 0) return NULL;
 
     alloc_info* ptr_temp_alloc_info = g_ptr_head_alloc_info;
     segment_info* ptr_segment_info;
@@ -50,7 +52,12 @@ void* mymalloc(const unsigned size_user_data) {
         g_ptr_head_alloc_info = g_ptr_tail_alloc_info = ptr_temp_alloc_info;
 
         debug_print_h1("Creating first alloc_info block");
-        if (DEBUG) printf("\nAllocated %u bytes\n", size_total);
+        debug_print_ptr("&alloc_info: ", g_ptr_head_alloc_info);
+        if (DEBUG) {
+            printf("sizeof(alloc_info):   %lu\n", sizeof(alloc_info));
+            printf("sizeof(segment_info): %lu\n", sizeof(segment_info));
+            printf("\nAllocated %u bytes\n", size_total);
+        }
         debug_print_alloc_info(ptr_temp_alloc_info);
     }
 
@@ -167,7 +174,7 @@ void* mymalloc(const unsigned size_user_data) {
         if (DEBUG) printf("\nAllocated %u bytes\n", size_total);
         debug_print_alloc_info(ptr_alloc_info);
 
-        ptr_temp_alloc_info = ptr_temp_alloc_info->ptr_next;
+        ptr_temp_alloc_info = g_ptr_tail_alloc_info;
     }
 
     debug_print_h1("Printing global linked list");
@@ -280,7 +287,7 @@ void debug_print_segment_info(segment_info* ptr_segment_info) {
     if (!DEBUG)
         return;
 
-    printf("\t* actual size:        %u, sizeof(segment_info): %lu\n", ptr_segment_info->size, sizeof(segment_info));
+    printf("\t* actual size:        %u\n", ptr_segment_info->size);
     print_ptr("\t* pointer to page:    ", ptr_segment_info->ptr_page);
     print_ptr("\t* first free:         ", (long)((void*)ptr_segment_info + ptr_segment_info->size) % (10u * 10 * 10 * 10 * 10));
 }
