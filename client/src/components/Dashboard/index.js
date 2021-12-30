@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // styles
@@ -32,11 +32,13 @@ const Dashboard = () => {
         Go back to peers
       </Button>
 
-      <Grid container flexDirection="column">
+      <Grid container>
         {chains.map((chain, i) => (
-          <Grid item key={i} mt={8}>
-            <Typography variant="h6">Peer #{chain.port} chain</Typography>
-            <Blockchain chain={chain.chain} />
+          <Grid item key={i} mt={8} xs={4}>
+            <Typography variant="h4" mb={3}>
+              Peer #{chain.port} chain
+            </Typography>
+            <Blockchain port={chain.port} />
           </Grid>
         ))}
       </Grid>

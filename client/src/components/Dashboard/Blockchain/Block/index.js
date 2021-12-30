@@ -1,15 +1,15 @@
 import React from 'react'
 
 // styles
-import { Box, Card, CardContent, CardActions, Typography, TextField } from '@mui/material'
+import { Box, Card, CardContent, CardActions, Typography } from '@mui/material'
 
-const Block = ({ data: { nonce, hash, data, timestamp } }) => {
+const Block = ({ data: { index, nonce, previousHash, hash, data, timestamp } }) => {
   return (
-    <Box sx={{ width: 250 }}>
+    <Box m={3}>
       <Card>
         <CardContent>
           <Typography variant="p" component="div">
-            Hash: {hash}
+            Previous hash: {previousHash === '0' ? '0' : previousHash.substring(0, 10)}
           </Typography>
           <Typography variant="p" component="div">
             Nonce: {nonce}
@@ -17,12 +17,15 @@ const Block = ({ data: { nonce, hash, data, timestamp } }) => {
           <Typography variant="p" component="div">
             Data: {data}
           </Typography>
-        </CardContent>
-
-        <CardActions>
           <Typography variant="p" component="div">
             Timestamp: {timestamp}
           </Typography>
+          <Typography variant="p" component="div">
+            Hash: {hash === '0' ? '0' : hash.substring(0, 10)}
+          </Typography>
+        </CardContent>
+        <CardActions sx={{ borderTop: '1px solid #fff', bgcolor: 'background.paper' }}>
+          <Typography variant="h6">Block #{index}</Typography>
         </CardActions>
       </Card>
     </Box>

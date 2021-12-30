@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from 'react'
+import React, { useState, useEffect, createContext, useMemo } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import axios from 'axios'
 
@@ -11,7 +11,6 @@ import Navbar from 'components/Navbar'
 import Peers from 'components/Peers'
 import Home from 'components/Home'
 import Dashboard from 'components/Dashboard'
-import Mine from 'components/Mine'
 
 // context
 export const PeerContext = createContext()
@@ -25,7 +24,7 @@ const theme = createTheme({
 })
 
 const App = () => {
-  const [numberOfPeers, setNumberOfPeers] = useState(3)
+  const [numberOfPeers, setNumberOfPeers] = useState(2)
   const [peers, setPeers] = useState([])
   const [connections, setConnections] = useState([])
   const [chains, setChains] = useState([])
@@ -45,17 +44,20 @@ const App = () => {
     )
   }, [peers])
 
-  const contextData = {
-    numberOfPeers,
-    setNumberOfPeers,
-    peers,
-    setPeers,
-    connections,
-    setConnections,
-    chains,
-    setChains,
-    navlinks: ['peers', 'dashboard'],
-  }
+  const contextData = useMemo(
+    () => ({
+      numberOfPeers,
+      setNumberOfPeers,
+      peers,
+      setPeers,
+      connections,
+      setConnections,
+      chains,
+      setChains,
+      navlinks: ['peers', 'dashboard'],
+    }),
+    [numberOfPeers, peers, connections, chains]
+  )
 
   return (
     <PeerContext.Provider value={contextData}>
@@ -66,7 +68,6 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/peers" element={<Peers />} />
-              <Route path="/mine" element={<Mine />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
           </Container>

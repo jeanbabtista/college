@@ -54,7 +54,7 @@ const Card = ({ id, port }) => {
       setChains(
         found
           ? chains.map((chain) => (chain.port === port ? { ...chain, chain: fetchedChain } : chain))
-          : [...chains, { port, chain: fetchedChain }]
+          : [...chains, { port, isMining: false, chain: fetchedChain }]
       )
 
       toast.success('Successfully fetched blockchain')
