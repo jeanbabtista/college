@@ -4,14 +4,18 @@
 #include <errno.h>
 #include <limits.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #define MAX 1000
 #define OPTIONS "oiOI" // options for flags, for example -o <arg>, -i <arg>, ...
 
 void
 parse_args(char*, char*, char*, char*, int, char**),
-handle_error(const char*), copy(char*, char*),
-stoi(int*, const char*);
+handle_error(const char*),
+copy(char*, char*),
+read_file(char*, int),
+write_file(char*, int);
 
 int main(int argc, char** argv) {
     char
@@ -25,13 +29,42 @@ int main(int argc, char** argv) {
     parse_args(file_name, file_descriptor, &first_flag, &second_flag, argc, argv);
 
     // convert file_descriptor to number
-    int fd;
-    stoi(&fd, file_descriptor);
-    if (fd == INT_MAX) fd = 1;
+    char* end;
+    int fd = strtol(file_descriptor, &end, 10);
+    if (*end != '\0')
+        fd = 0;
 
-    // print
-    printf("file name: %s, mode: %c\n", file_name, first_flag);
-    printf("file desc: %d, mode: %c\n", fd, second_flag);
+    // open file if user specified it
+    int is_opened = 0;
+    if (*file_name) {
+        fd = open(file_name, O_RDWR);
+        printf("Opened file %s\n", file_name);
+        printf("Opened fd: %d\n", fd);
+        is_opened = 1;
+    }
+
+    // set reading / writing buffer
+    const unsigned length = 1;
+    char buffer[length + 1];
+
+    // read file
+    printf("Read: ");
+    while (1) {
+        int r = read(fd, buffer, length);
+        buffer[r] = '\0';
+
+        if (r <= 0)
+            break;
+
+        printf("%d ", buffer[0]);
+    }
+    printf("\n");
+
+    // close file if opened
+    if (is_opened) {
+        printf("Closing opened fd %d\n", fd);
+        close(fd);
+    }
 }
 
 void handle_error(const char* message) {
@@ -45,32 +78,15 @@ void copy(char* dest, char* src) {
     dest[strlen(src)] = '\0';
 }
 
-void stoi(int* number, const char* string_number) {
-    if (string_number[0] == '\0' || isspace(number[0])) {
-        *number = INT_MAX;
-        return;
-    }
-
-    char* end;
-    long value = strtol(string_number, &end, 10);
-
-    if (*end != '\0') {
-        *number = INT_MAX;
-        return;
-    }
-
-    *number = (int)value;
-}
-
 void parse_args(char* file_name, char* file_descriptor, char* first_flag, char* second_flag, int argc, char** argv) {
     argc--;
     argv++;
 
     if (argc % 2)
-        handle_error("Error: wrong number of arguments suplied. Every flag requires a value.");
+        handle_error("Error: wrong number of arguments supplied. Every flag requires a value.");
 
     char
-        * values[2] = { "", "" },
+        * values[2] = { "", "0" },
         flags[2] = ""; // ~ flag[2] = {0, 0};
 
     for (unsigned i = 0; i < argc - 1 && argc > 0; i += 2) {
