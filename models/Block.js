@@ -1,16 +1,15 @@
 import crypto from 'crypto'
 
 class Block {
-  constructor(data = '') {
-    this.nonce = 0
+  constructor(index, data, difficulty, previousHash) {
+    this.index = index
+    this.difficulty = difficulty
+    this.previousHash = previousHash
     this.hash = '0'
+    this.nonce = 0
     this.data = data
     this.timestamp = Date.now()
   }
-
-  setIndex = (index) => (this.index = index)
-  setDifficulty = (difficulty) => (this.difficulty = difficulty)
-  setPreviousHash = (previousHash) => (this.previousHash = previousHash)
 
   computeHash = () =>
     crypto
@@ -46,6 +45,7 @@ class Block {
       this.previousHash === '0' ? '\t0' : this.previousHash.substring(0, substringPosition)
     )
     console.log('data:', this.data)
+    console.log('timestamp:', this.timestamp)
     console.log('hash:', this.hash.substring(0, substringPosition))
   }
 }

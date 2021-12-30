@@ -12,7 +12,7 @@ class Blockchain {
   #generator
 
   constructor() {
-    this.chain = [new Block()]
+    this.chain = [new Block(0, 'Genesis', this.difficulty, '0')]
     this.difficulty = 4
     this.#generator = id()
 
@@ -22,18 +22,16 @@ class Blockchain {
   getIndex = () => this.#generator.next().value
   getLastBlock = () => this.chain[this.chain.length - 1]
 
-  addBlock = async (block) =>
+  addBlock = async (data) =>
     new Promise((resolve) => {
-      block.setIndex(this.getIndex())
-      block.setDifficulty(this.difficulty)
-      block.setPreviousHash(this.getLastBlock().hash)
-      block.mine(this.difficulty)
+      const block = new Block(this.getIndex(), 'block', this.difficulty, this.getLastBlock().hash)
+      block.mine(this.difficulty).then(() => {
+        this.chain.push(block)
+        block.print()
+        console.log(`Chain is ${this.isValid() ? '' : 'in'}valid.`)
 
-      this.chain.push(block)
-      block.print()
-      console.log(`Chain is ${this.isValid() ? '' : 'in'}valid.`)
-
-      resolve()
+        resolve()
+      })
     })
 
   print = () => {
@@ -48,7 +46,7 @@ class Blockchain {
       if (
         currBlock.index !== prevBlock.index + 1 ||
         currBlock.previousHash !== prevBlock.hash ||
-        currBlock.hash !== currBlock.computeHash(this.difficulty)
+        currBlock.hash !== currBlock.computeHash()
       )
         return false
     }

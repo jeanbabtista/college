@@ -4,6 +4,8 @@ import Blockchain from './models/Blockchain.js'
 import Server, { app, server } from './sockets/Server.js'
 import Client from './sockets/Client.js'
 import { exit } from 'process'
+
+// constants
 import actions from './sockets/actions.js'
 
 // parse arguments
@@ -14,23 +16,15 @@ if (process.argv.length !== 3) {
 
 // config
 const port = process.argv[2]
-const blockchain = new Blockchain()
-const serverSocket = new Server(port, blockchain)
+const serverSocket = new Server(port, new Blockchain())
 
 // helpers
 console.log('[ CONFIG ]')
 console.log('# URL:', serverSocket.url)
-
-const mine = async () => {
-  let i = 0
-  while (i < 50) {
-    await blockchain.addBlock(new Block({ from: 'zan', to: 'mafija', amount: 100 }))
-    i++
-  }
-}
+const getResponse = (error, message) => ({ error, message })
 
 // routes
-app.get('/chain', (_req, res) => res.json(blockchain.chain))
+app.get('/chain', (_req, res) => res.json(serverSocket.blockchain.chain))
 app.get('/nodes', (_req, res) => res.json(serverSocket.getNodes()))
 
 app.post('/nodes/add', (req, res) => {
@@ -38,22 +32,21 @@ app.post('/nodes/add', (req, res) => {
   const node = new Client(port)
 
   node.socket.on(actions.JOIN_SERVER, () => {
-    if (!node.socket.connected) return res.json(getResponse(true, 'Cannot connect to the client.'))
+    if (!node.socket.connected) return res.json(getResponse(true, 'Cannot connect to the client'))
 
     node.message('Connected.')
-    res.json(getResponse(null, `Successfully added node [ ${node.url} ]`))
+    res.json(getResponse(null, `Successfully added node to peer`))
   })
 
-  serverSocket.addNode(port, node)
+  serverSocket.addNode(port, node.socket)
+
+  // console.log('client nodes:', serverSocket.getNodes())
 })
 
-app.post('/mine', async (_req, res) => {
-  try {
-    await blockchain.addBlock(new Block({ from: 'zan', to: 'mafija', amount: 100 }))
-    res.json({ error: false, message: 'Successfully added new block to the blockchain.' })
-  } catch (e) {
-    res.json({ error: true, message: e.message })
-  }
+app.post('/mine', async (req, res) => {
+  serverSocket.mine()
+  console.log('# Mining started.')
+  res.json(getResponse(null, `Mining started on port ${port}`))
 })
 
 server.listen(port)
