@@ -1,6 +1,6 @@
 #include "mymalloc.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #define debug_print_ptr(msg, addr) if (DEBUG) print_ptr(msg, addr)
 #define debug_print_h1(msg) if (DEBUG) print_h1(msg)
 
