@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react'
+import React, { useEffect, useContext, useState } from 'react'
 import io from 'socket.io-client'
 import { toast } from 'react-toastify'
 import ScrollToBottom from 'react-scroll-to-bottom'
@@ -15,18 +15,31 @@ import Notification from 'components/Notifications'
 import { PeerContext } from 'components/App'
 
 // api
-import { postMine } from 'api/chain'
+import { postStartMining, postStopMining } from 'api/chain'
 
 const Blockchain = ({ port }) => {
   const { chains, setChains } = useContext(PeerContext)
   const chain = chains.find((chain) => chain.port === port)
-  const miningLocked = chain.isMining
+  const [isMiningLocked, setIsMiningLocked] = useState(chain.isMining)
+
+  console.log('Blockchain', port)
 
   const handleOnClick = async () => {
+    setIsMiningLocked((prev) => !prev)
+
+    if (isMiningLocked) {
+      try {
+        const response = await postStopMining(port)
+        toast.success(response.message)
+      } catch (e) {
+        toast.error(e.message)
+      }
+    }
+
     setChains(chains.map((chain) => (chain.port === port ? { ...chain, isMining: true } : chain)))
 
     try {
-      const response = await postMine(port)
+      const response = await postStartMining(port)
       toast.success(response.message)
     } catch (e) {
       toast.error(e.message)
@@ -42,14 +55,19 @@ const Blockchain = ({ port }) => {
 
   return (
     <>
-      <Button variant="outlined" disabled={miningLocked} sx={{ mb: 3 }} onClick={handleOnClick}>
-        Mine
+      <Button
+        variant="outlined"
+        sx={{ mb: 3 }}
+        color={!isMiningLocked ? 'primary' : 'secondary'}
+        onClick={handleOnClick}
+      >
+        {!isMiningLocked ? 'mine' : 'stop'}
       </Button>
 
       <ScrollToBottom className={css({ width: '90%', height: 500 })}>
         {chain.chain.map((block, i) => (
           <Grid item key={i}>
-            <Block data={block} />
+            <Block {...block} />
           </Grid>
         ))}
       </ScrollToBottom>

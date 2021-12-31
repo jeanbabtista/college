@@ -1,11 +1,9 @@
 import axios from 'axios'
 
-export const getChain = async (port) => {
-  const url = `http://localhost:${port}/chain`
-  return (await axios.get(url)).data
-}
+export const getChain = async (port) => (await axios.get(`http://localhost:${port}/chain`)).data
 
-export const postMine = async (port) => {
-  const url = `http://localhost:${port}/mine`
-  return (await axios.post(url)).data
-}
+export const postStartMining = async (port) =>
+  (await axios.post(`http://localhost:${port}/start_mining`)).data
+
+export const postStopMining = async (port) =>
+  (await axios.post(`http://localhost:${port}/stop_mining`)).data

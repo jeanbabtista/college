@@ -13,10 +13,9 @@ class Blockchain {
 
   constructor() {
     this.chain = [new Block(0, 'Genesis', this.difficulty, '0')]
-    this.difficulty = 4
+    this.difficulty = 5
     this.#generator = id()
-
-    setInterval(this.handleSync, blockGenerationInterval * 1000)
+    this.interval = setInterval(this.handleSync, blockGenerationInterval * 1000)
   }
 
   getIndex = () => this.#generator.next().value

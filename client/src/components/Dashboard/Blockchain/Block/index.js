@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { memo } from 'react'
 
 // styles
 import { Box, Card, CardContent, CardActions, Typography } from '@mui/material'
 
-const Block = ({ data: { index, nonce, previousHash, hash, data, timestamp } }) => {
+const Block = ({ index, nonce, previousHash, hash, data, timestamp }) => {
+  console.log('Block')
+
   return (
     <Box m={3}>
       <Card>
@@ -32,4 +34,4 @@ const Block = ({ data: { index, nonce, previousHash, hash, data, timestamp } }) 
   )
 }
 
-export default Block
+export default memo(Block)
