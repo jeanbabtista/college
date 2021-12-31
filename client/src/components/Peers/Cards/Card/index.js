@@ -21,10 +21,9 @@ import { PeerContext } from 'components/App'
 
 // api
 import { postAddNode } from 'api/nodes'
-import { getChain } from 'api/chain'
 
 const Card = ({ id, port }) => {
-  const { peers, setPeers, connections, chains, setChains } = useContext(PeerContext)
+  const { peers, setPeers, connections } = useContext(PeerContext)
   const [value, setValue] = useState(port)
   const [loading, setLoading] = useState(false)
 
@@ -43,24 +42,6 @@ const Card = ({ id, port }) => {
       .find((connection) => connection.port === port)
       .to.filter((connection) => connection.port !== port && connection.connected)
       .map((connection) => connection.port)
-
-    // console.log(`Port ${port} connecting to [${connectionPorts.join(', ')}] ...`)
-
-    // get initial blockchain for current peer port
-    try {
-      const found = chains.find((chain) => chain.port === port)
-      const fetchedChain = await getChain(port)
-
-      setChains(
-        found
-          ? chains.map((chain) => (chain.port === port ? { ...chain, chain: fetchedChain } : chain))
-          : [...chains, { port, isMining: false, chain: fetchedChain }]
-      )
-
-      toast.success('Successfully fetched blockchain')
-    } catch (e) {
-      toast.error(e.message)
-    }
 
     // add peer nodes to the server
     try {

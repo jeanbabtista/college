@@ -43,14 +43,14 @@ app.post('/nodes/add', (req, res) => {
 
 app.post('/start_mining', (_req, res) => {
   serverSocket.startMining()
-  console.log('# Mining started.')
+  serverSocket.message('Mining started.')
   res.json(getResponse(null, `Mining started on port ${port}`))
 })
 
-app.post('/stop_mining', (_req, res) => {
+/* app.post('/stop_mining', (_req, res) => {
   serverSocket.stopMining()
-  console.log('# Mining stopped.')
+  serverSocket.message('Mining stopped.')
   res.json(getResponse(null, `Mining stopped on port ${port}`))
-})
+}) */
 
 server.listen(port)

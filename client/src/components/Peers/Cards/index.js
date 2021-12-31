@@ -16,7 +16,7 @@ const Cards = () => {
     <Grid container mt={5} spacing={4}>
       {peers.map((peer, i) => (
         <Grid item key={i}>
-          <Card {...peer} />
+          <Card id={peer.id} port={peer.port} />
         </Grid>
       ))}
     </Grid>

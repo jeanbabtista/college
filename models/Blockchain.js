@@ -26,9 +26,11 @@ class Blockchain {
       const block = new Block(this.getIndex(), 'block', this.difficulty, this.getLastBlock().hash)
       block.mine(this.difficulty).then(() => {
         this.chain.push(block)
-        block.print()
-        console.log(`Chain is ${this.isValid() ? '' : 'in'}valid.`)
 
+        // block.print()
+        // console.log(`Chain is ${this.isValid() ? '' : 'in'}valid.`)
+
+        console.log(block.index, '. Block mined')
         resolve()
       })
     })

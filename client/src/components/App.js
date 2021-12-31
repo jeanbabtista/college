@@ -27,15 +27,19 @@ const App = () => {
   const [numberOfPeers, setNumberOfPeers] = useState(2)
   const [peers, setPeers] = useState([])
   const [connections, setConnections] = useState([])
-  const [chains, setChains] = useState([])
+
+  useEffect(
+    () =>
+      setPeers(
+        [...Array(numberOfPeers)].map((_, i) => ({
+          id: i + 1,
+          port: 5000 + i,
+        }))
+      ),
+    [numberOfPeers]
+  )
 
   useEffect(() => {
-    setChains([])
-    setPeers([...Array(numberOfPeers)].map((_, i) => ({ id: i + 1, port: 5000 + i })))
-  }, [numberOfPeers])
-
-  useEffect(() => {
-    setChains([])
     setConnections(
       peers.map((peer) => ({
         port: peer.port,
@@ -52,11 +56,9 @@ const App = () => {
       setPeers,
       connections,
       setConnections,
-      chains,
-      setChains,
       navlinks: ['peers', 'dashboard'],
     }),
-    [numberOfPeers, peers, connections, chains]
+    [numberOfPeers, peers, connections]
   )
 
   return (

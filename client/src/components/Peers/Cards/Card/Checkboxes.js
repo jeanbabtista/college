@@ -34,12 +34,6 @@ const Checkboxes = ({ id, port }) => {
     )
   }
 
-  /* // debug Checkbox checked value
-  const getCheckedValue = connections
-    .find((connection) => connection.port === port)
-    ?.to.filter((connection) => connection.port !== port)
-  console.log(port, '->', getCheckedValue) */
-
   return (
     <FormControl>
       <FormLabel component="legend" sx={{ mt: 3 }}>

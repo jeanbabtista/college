@@ -29,7 +29,6 @@ class Server {
     this.port = port
     this.url = `http://localhost:${port}`
     this.nodes = new Map()
-    this.isMining = false
     this.listen()
   }
 
@@ -40,19 +39,17 @@ class Server {
   message = (message) => console.log(`[ Server|${this.port} ]: ${message}`)
 
   startMining = async () => {
-    this.isMining = true
-
-    while (this.isMining) {
-      console.log('isMining:', this.isMining)
+    while (true) {
       await this.blockchain.addBlock('block')
       io.sockets.emit('send-chain', this.blockchain.chain)
     }
   }
 
-  stopMining = () => {
-    this.isMining = false
-    clearInterval(this.blockchain.interval)
-  }
+  /* stopMining = async () =>
+    setImmediate(() => {
+      this.isMining = false
+      clearInterval(this.blockchain.interval)
+    }) */
 
   listen = () => io.on('connection', (socket) => socket.emit(actions.JOIN_SERVER))
 }
