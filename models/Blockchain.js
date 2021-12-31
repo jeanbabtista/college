@@ -44,11 +44,7 @@ class Blockchain {
       const currBlock = this.chain[i]
       const prevBlock = this.chain[i - 1]
 
-      if (
-        currBlock.index !== prevBlock.index + 1 ||
-        currBlock.previousHash !== prevBlock.hash ||
-        currBlock.hash !== currBlock.computeHash()
-      )
+      if (currBlock.index !== prevBlock.index + 1 || currBlock.previousHash !== prevBlock.hash || currBlock.hash !== currBlock.computeHash())
         return false
     }
 
@@ -56,8 +52,7 @@ class Blockchain {
   }
 
   trySetChain = (chain) => {
-    const calculateCumulativeDifficulty = (chain) =>
-      chain.reduce((acc, block) => acc + 2 ** block.getDifficulty(), 0)
+    const calculateCumulativeDifficulty = (chain) => chain.reduce((acc, block) => acc + 2 ** block.difficulty, 0)
 
     const thisDiff = calculateCumulativeDifficulty(this.chain)
     const otherDiff = calculateCumulativeDifficulty(chain)

@@ -17,16 +17,12 @@ if (process.argv.length !== 3) {
 // config
 const port = process.argv[2]
 const serverSocket = new Server(port, new Blockchain())
+serverSocket.message(serverSocket.url)
 
 // helpers
-console.log('[ CONFIG ]')
-console.log('# URL:', serverSocket.url)
 const getResponse = (error, message) => ({ error, message })
 
 // routes
-app.get('/chain', (_req, res) => res.json(serverSocket.blockchain.chain))
-app.get('/nodes', (_req, res) => res.json(serverSocket.getNodes()))
-
 app.post('/nodes/add', (req, res) => {
   const { port } = req.body
   const node = new Client(port)
@@ -38,6 +34,14 @@ app.post('/nodes/add', (req, res) => {
     res.json(getResponse(null, `Successfully added node to peer`))
   })
 
+  node.socket.on('try-set-chain', (data) => {
+    console.log('trying to set chain from port', data.port)
+    serverSocket.blockchain.trySetChain(data.chain)
+
+    console.log('received chain:', data.chain)
+    console.log('new chain:', serverSocket.blockchain.chain)
+  })
+
   serverSocket.addNode(port, node.socket)
 })
 
@@ -47,10 +51,16 @@ app.post('/start_mining', (_req, res) => {
   res.json(getResponse(null, `Mining started on port ${port}`))
 })
 
-/* app.post('/stop_mining', (_req, res) => {
-  serverSocket.stopMining()
-  serverSocket.message('Mining stopped.')
-  res.json(getResponse(null, `Mining stopped on port ${port}`))
-}) */
+app.post('/test_send_chain', (req, res) => {
+  const port = parseInt(req.body.port)
+  const clientSocket = serverSocket.nodes.get(port)
+
+  if (!clientSocket) return res.json(getResponse(true, 'Specified client is not connected'))
+
+  console.log('sending chain to client', clientSocket.io.uri)
+  serverSocket.sendChain(port)
+
+  res.json(getResponse(null, 'Successfully sent chain to client'))
+})
 
 server.listen(port)

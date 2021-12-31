@@ -19,13 +19,9 @@
     "url": "https://github.com/jeanbabtista/vaje/issues"
   },
   "homepage": "https://github.com/jeanbabtista/vaje#readme",
-  "devDependencies": {
-    "prettier": "^2.5.1"
-  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.2",
-    "morgan": "^1.10.0",
     "socket.io": "^4.4.0",
     "socket.io-client": "^4.4.0"
   }
