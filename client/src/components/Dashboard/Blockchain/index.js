@@ -14,10 +14,7 @@ import Notification from 'components/Notifications'
 // api
 import { postStartMining } from 'api/chain'
 
-const timeout = () => new Promise((resolve) => setTimeout(resolve, 1000))
-
 const Blockchain = ({ port }) => {
-  // const { peers, setPeers } = useContext(PeerContext)
   const [chain, setChain] = useState([])
 
   console.log('Blockchain', port)
@@ -33,11 +30,7 @@ const Blockchain = ({ port }) => {
 
   useEffect(() => {
     const socket = io.connect(`http://localhost:${port}`)
-
-    socket.on('send-chain', async (receivedChain) => {
-      await timeout()
-      setChain(receivedChain)
-    })
+    socket.on('send-chain', async (receivedChain) => setChain(receivedChain))
   }, [port])
 
   return (

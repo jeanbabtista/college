@@ -16,8 +16,6 @@ const io = new SocketServer(server, {
   },
 })
 
-app.io = io
-
 // middleware
 app.use(express.json())
 app.use(cors())
@@ -37,13 +35,16 @@ class Server {
 
   startMining = async () => {
     while (true) {
-      await this.blockchain.addBlock('block')
-      io.sockets.emit('send-chain', this.blockchain.chain)
-    }
-  }
+      try {
+        io.sockets.emit('send-chain', this.blockchain.chain)
 
-  sendChain = (port) => {
-    io.sockets.emit('try-set-chain', { port: this.port, chain: this.blockchain.chain })
+        const response = await this.blockchain.addBlock('block')
+        console.log(response)
+      } catch (e) {
+        console.log(e)
+        break
+      }
+    }
   }
 }
 

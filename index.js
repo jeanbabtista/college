@@ -34,33 +34,19 @@ app.post('/nodes/add', (req, res) => {
     res.json(getResponse(null, `Successfully added node to peer`))
   })
 
-  node.socket.on('try-set-chain', (data) => {
-    console.log('trying to set chain from port', data.port)
-    serverSocket.blockchain.trySetChain(data.chain)
-
-    console.log('received chain:', data.chain)
-    console.log('new chain:', serverSocket.blockchain.chain)
+  node.socket.on('send-chain', (chain) => {
+    if (!chain) return
+    const response = serverSocket.blockchain.trySetChain(chain)
+    console.log(response ? 'chain was changed' : 'chain was not changed')
   })
 
   serverSocket.addNode(port, node.socket)
 })
 
-app.post('/start_mining', (_req, res) => {
+app.post('/mining/start', (req, res) => {
   serverSocket.startMining()
   serverSocket.message('Mining started.')
   res.json(getResponse(null, `Mining started on port ${port}`))
-})
-
-app.post('/test_send_chain', (req, res) => {
-  const port = parseInt(req.body.port)
-  const clientSocket = serverSocket.nodes.get(port)
-
-  if (!clientSocket) return res.json(getResponse(true, 'Specified client is not connected'))
-
-  console.log('sending chain to client', clientSocket.io.uri)
-  serverSocket.sendChain(port)
-
-  res.json(getResponse(null, 'Successfully sent chain to client'))
 })
 
 server.listen(port)

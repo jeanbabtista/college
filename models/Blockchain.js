@@ -12,32 +12,29 @@ class Blockchain {
   #generator
 
   constructor() {
-    this.chain = [new Block(0, 'Genesis', this.difficulty, '0')]
-    this.difficulty = 5
+    this.difficulty = 4
     this.#generator = id()
     this.interval = setInterval(this.handleSync, blockGenerationInterval * 1000)
+    this.chain = [new Block(0, 'Genesis', this.difficulty, '0')]
   }
 
   getIndex = () => this.#generator.next().value
   getLastBlock = () => this.chain[this.chain.length - 1]
 
   addBlock = async (data) =>
-    new Promise((resolve) => {
+    new Promise((resolve, reject) => {
       const block = new Block(this.getIndex(), 'block', this.difficulty, this.getLastBlock().hash)
-      block.mine(this.difficulty).then(() => {
+
+      if ((Date.now() - this.timestamp) / 1000 > 60 || (block.timestamp - this.getLastBlock().timestamp) / 1000 > 60) {
+        clearInterval(this.interval)
+        reject(`Error: block's time badges are invalid`)
+      }
+
+      block.mine().then(() => {
         this.chain.push(block)
-
-        // block.print()
-        // console.log(`Chain is ${this.isValid() ? '' : 'in'}valid.`)
-
-        console.log(block.index, '. Block mined')
-        resolve()
+        resolve(`${block.index}. block mined`)
       })
     })
-
-  print = () => {
-    for (const block of this.chain) block.print()
-  }
 
   isValid = () => {
     for (let i = 1; i < this.chain.length; i++) {
@@ -57,7 +54,19 @@ class Blockchain {
     const thisDiff = calculateCumulativeDifficulty(this.chain)
     const otherDiff = calculateCumulativeDifficulty(chain)
 
-    if (thisDiff < otherDiff) this.chain = chain
+    if (thisDiff < otherDiff) {
+      this.chain = chain.map((block) => {
+        const b = new Block(block.index, block.data, block.difficulty, block.previousHash)
+        b.hash = block.hash
+        b.nonce = block.nonce
+        b.hash = block.hash
+
+        return b
+      })
+      return true
+    }
+
+    return false
   }
 
   handleSync = () => {

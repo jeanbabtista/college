@@ -2,14 +2,7 @@ import React, { useState, useContext } from 'react'
 import { toast } from 'react-toastify'
 
 // styles
-import {
-  Box,
-  Card as MuiCard,
-  CardContent,
-  CardActions,
-  Typography,
-  TextField,
-} from '@mui/material'
+import { Box, Card as MuiCard, CardContent, CardActions, Typography, TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 
 // components
@@ -30,9 +23,7 @@ const Card = ({ id, port }) => {
   const handleOnChange = (e) => {
     const newPort = parseInt(e.target.value)
     setValue(newPort)
-    setPeers(
-      peers.map((peer) => (peer.id === id ? Object.assign({}, peer, { port: newPort }) : peer))
-    )
+    setPeers(peers.map((peer) => (peer.id === id ? Object.assign({}, peer, { port: newPort }) : peer)))
   }
 
   const handleConnectPeers = async () => {
@@ -47,7 +38,7 @@ const Card = ({ id, port }) => {
     try {
       for (const portTo of connectionPorts) {
         const response = await postAddNode(port, portTo)
-        toast.success(response.data.message)
+        toast.success(response.message)
       }
     } catch (e) {
       toast.error(e.message)
@@ -63,13 +54,7 @@ const Card = ({ id, port }) => {
           <Typography gutterBottom variant="h5" component="div">
             {id}. peer
           </Typography>
-          <TextField
-            type="number"
-            label="PORT"
-            variant="filled"
-            value={value}
-            onChange={handleOnChange}
-          />
+          <TextField type="number" label="PORT" variant="filled" value={value} onChange={handleOnChange} />
 
           <Checkboxes id={id} port={port} />
         </CardContent>

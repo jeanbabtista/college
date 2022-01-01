@@ -31,20 +31,20 @@ const App = () => {
   useEffect(
     () =>
       setPeers(
-        [...Array(numberOfPeers)].map((_, i) => ({
+        [...Array(numberOfPeers).keys()].map((i) => ({
           id: i + 1,
           port: 5000 + i,
-        }))
+        })),
       ),
-    [numberOfPeers]
+    [numberOfPeers],
   )
 
   useEffect(() => {
     setConnections(
       peers.map((peer) => ({
         port: peer.port,
-        to: peers.map((p) => ({ port: p.port, connected: p.id === peer.id })),
-      }))
+        to: peers.map((p) => ({ port: p.port, connected: true })),
+      })),
     )
   }, [peers])
 
@@ -58,7 +58,7 @@ const App = () => {
       setConnections,
       navlinks: ['peers', 'dashboard'],
     }),
-    [numberOfPeers, peers, connections]
+    [numberOfPeers, peers, connections],
   )
 
   return (
