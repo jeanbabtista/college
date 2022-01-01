@@ -36,10 +36,8 @@ class Server {
   startMining = async () => {
     while (true) {
       try {
+        await this.blockchain.addBlock('block')
         io.sockets.emit('send-chain', this.blockchain.chain)
-
-        const response = await this.blockchain.addBlock('block')
-        console.log(response)
       } catch (e) {
         console.log(e)
         break

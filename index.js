@@ -29,21 +29,20 @@ app.post('/nodes/add', (req, res) => {
 
   node.socket.on(actions.JOIN_SERVER, () => {
     if (!node.socket.connected) return res.json(getResponse(true, 'Cannot connect to the client'))
-
     node.message('Connected.')
-    res.json(getResponse(null, `Successfully added node to peer`))
   })
 
-  node.socket.on('send-chain', (chain) => {
+  node.socket.on(actions.SEND_CHAIN, (chain) => {
     if (!chain) return
-    const response = serverSocket.blockchain.trySetChain(chain)
-    console.log(response ? 'chain was changed' : 'chain was not changed')
+    serverSocket.blockchain.trySetChain(chain)
   })
 
   serverSocket.addNode(port, node.socket)
+
+  res.json(getResponse(null, `Successfully added node to peer`))
 })
 
-app.post('/mining/start', (req, res) => {
+app.post('/mining/start', (_req, res) => {
   serverSocket.startMining()
   serverSocket.message('Mining started.')
   res.json(getResponse(null, `Mining started on port ${port}`))

@@ -23,7 +23,7 @@ class Blockchain {
 
   addBlock = async (data) =>
     new Promise((resolve, reject) => {
-      const block = new Block(this.getIndex(), 'block', this.difficulty, this.getLastBlock().hash)
+      const block = new Block(this.getLastBlock().index + 1, 'block', this.difficulty, this.getLastBlock().hash)
 
       if ((Date.now() - this.timestamp) / 1000 > 60 || (block.timestamp - this.getLastBlock().timestamp) / 1000 > 60) {
         clearInterval(this.interval)
@@ -32,7 +32,7 @@ class Blockchain {
 
       block.mine().then(() => {
         this.chain.push(block)
-        resolve(`${block.index}. block mined`)
+        resolve()
       })
     })
 
@@ -54,7 +54,7 @@ class Blockchain {
     const thisDiff = calculateCumulativeDifficulty(this.chain)
     const otherDiff = calculateCumulativeDifficulty(chain)
 
-    if (thisDiff < otherDiff) {
+    if (thisDiff < otherDiff)
       this.chain = chain.map((block) => {
         const b = new Block(block.index, block.data, block.difficulty, block.previousHash)
         b.hash = block.hash
@@ -63,10 +63,6 @@ class Blockchain {
 
         return b
       })
-      return true
-    }
-
-    return false
   }
 
   handleSync = () => {
@@ -84,6 +80,7 @@ class Blockchain {
         : prevAdjustBlock.difficulty
 
     console.log('\nDifficulty updated to', this.difficulty)
+    console.log('\nChain:', this.chain)
   }
 }
 
