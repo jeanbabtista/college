@@ -44,7 +44,7 @@ const App = () => {
       setConnections(
         peers.map((peer) => ({
           port: peer.port,
-          to: peers.map((p) => ({ port: p.port, connected: true })),
+          to: peers.map((p) => ({ port: p.port, connected: true, actuallyConnected: false })),
         })),
       ),
     [peers],

@@ -16,7 +16,7 @@ import { PeerContext } from 'components/App'
 import { postAddNode } from 'api/nodes'
 
 const Card = ({ id, port }) => {
-  const { peers, setPeers, connections } = useContext(PeerContext)
+  const { peers, setPeers, connections, setConnections } = useContext(PeerContext)
   const [value, setValue] = useState(port)
   const [loading, setLoading] = useState(false)
 
@@ -38,6 +38,19 @@ const Card = ({ id, port }) => {
     try {
       for (const portTo of connectionPorts) {
         const response = await postAddNode(port, portTo)
+
+        // set actuallyConnected property to true
+        setConnections((prev) =>
+          prev.map((c) =>
+            c.port === port
+              ? {
+                  ...c,
+                  to: c.to.map((to) => (to.port === portTo ? { ...to, actuallyConnected: true } : to)),
+                }
+              : c,
+          ),
+        )
+
         toast.success(response.message)
       }
     } catch (e) {

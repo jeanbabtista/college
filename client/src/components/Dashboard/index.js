@@ -11,7 +11,7 @@ import Blockchain from './Blockchain'
 import { PeerContext } from 'components/App'
 
 const Dashboard = () => {
-  const { peers } = useContext(PeerContext)
+  const { peers, connections } = useContext(PeerContext)
   const navigate = useNavigate()
 
   return (
@@ -20,11 +20,20 @@ const Dashboard = () => {
         Go back to peers
       </Button>
 
-      <Grid container>
+      <Grid container mb={3}>
         {peers.map((peer, i) => (
           <Grid item key={i} mt={8} xs={4}>
-            <Typography variant="h4" mb={3}>
-              Peer #{peer.port} chain
+            <Typography variant="h5" mb={3}>
+              Peer::{peer.port} chain
+            </Typography>
+            <Typography variant="p" component="div" mb={3}>
+              [ Connected to{' '}
+              {connections
+                .find((connection) => connection.port === peer.port)
+                .to.filter((connection) => connection.port !== peer.port && connection.actuallyConnected)
+                .map((connection) => connection.port)
+                .join(', ')}{' '}
+              ]
             </Typography>
             <Blockchain port={peer.port} />
           </Grid>
