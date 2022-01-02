@@ -1,5 +1,4 @@
 // models
-import Block from './models/Block.js'
 import Blockchain from './models/Blockchain.js'
 import Server, { app, server } from './sockets/Server.js'
 import Client from './sockets/Client.js'
@@ -32,13 +31,15 @@ app.post('/nodes/add', (req, res) => {
     node.message('Connected.')
   })
 
-  node.socket.on(actions.SEND_CHAIN, (chain) => {
-    if (!chain) return
-    serverSocket.blockchain.trySetChain(chain)
+  node.socket.on('try-set-chain', async (chain) => {
+    try {
+      await serverSocket.blockchain.trySetChain(chain)
+    } catch (e) {
+      console.log(e.message)
+    }
   })
 
   serverSocket.addNode(port, node.socket)
-
   res.json(getResponse(null, `Successfully added node to peer`))
 })
 

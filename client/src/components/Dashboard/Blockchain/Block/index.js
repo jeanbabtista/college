@@ -4,7 +4,7 @@ import React, { memo } from 'react'
 import { Box, Card, CardContent, CardActions, Typography } from '@mui/material'
 
 const Block = ({ index, nonce, previousHash, hash, data, timestamp }) => {
-  console.log('Block')
+  // console.log('Block')
 
   return (
     <Box m={3}>

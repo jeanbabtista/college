@@ -24,7 +24,7 @@ const theme = createTheme({
 })
 
 const App = () => {
-  const [numberOfPeers, setNumberOfPeers] = useState(2)
+  const [numberOfPeers, setNumberOfPeers] = useState(3)
   const [peers, setPeers] = useState([])
   const [connections, setConnections] = useState([])
 
@@ -39,14 +39,16 @@ const App = () => {
     [numberOfPeers],
   )
 
-  useEffect(() => {
-    setConnections(
-      peers.map((peer) => ({
-        port: peer.port,
-        to: peers.map((p) => ({ port: p.port, connected: true })),
-      })),
-    )
-  }, [peers])
+  useEffect(
+    () =>
+      setConnections(
+        peers.map((peer) => ({
+          port: peer.port,
+          to: peers.map((p) => ({ port: p.port, connected: true })),
+        })),
+      ),
+    [peers],
+  )
 
   const contextData = useMemo(
     () => ({

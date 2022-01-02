@@ -34,15 +34,29 @@ class Server {
   listen = () => io.on('connection', (socket) => socket.emit(actions.JOIN_SERVER))
 
   startMining = async () => {
+    this.interval = setInterval(this.handleSync, this.blockchain.blockGenerationInterval * 1000)
+
     while (true) {
       try {
-        await this.blockchain.addBlock('block')
+        await this.blockchain.tryAddBlock('block')
         io.sockets.emit('send-chain', this.blockchain.chain)
       } catch (e) {
         console.log(e)
+        clearInterval(this.interval)
         break
       }
     }
+  }
+
+  handleSync = () => {
+    this.blockchain.handleSync()
+
+    console.log('\nDifficulty updated to', this.blockchain.difficulty)
+    console.log(`Chain is ${this.blockchain.isValid() ? '' : 'in'}valid`)
+    // console.log('Last valid index:', this.blockchain.lastValidIndex())
+
+    // adjust chain
+    io.sockets.emit('try-set-chain', this.blockchain.chain)
   }
 }
 

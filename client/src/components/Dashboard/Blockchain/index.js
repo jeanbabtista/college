@@ -16,8 +16,7 @@ import { postStartMining } from 'api/chain'
 
 const Blockchain = ({ port }) => {
   const [chain, setChain] = useState([])
-
-  console.log('Blockchain', port)
+  // console.log('Blockchain', port)
 
   const handleOnClick = async () => {
     try {
@@ -30,7 +29,8 @@ const Blockchain = ({ port }) => {
 
   useEffect(() => {
     const socket = io.connect(`http://localhost:${port}`)
-    socket.on('send-chain', async (receivedChain) => setChain(receivedChain))
+    socket.on('send-chain', (receivedChain) => setChain(receivedChain))
+    socket.on('try-set-chain', (receivedChain) => setChain(receivedChain))
   }, [port])
 
   return (
