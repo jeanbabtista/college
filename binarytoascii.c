@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define MAX 1000
+#define MAX 50000
 #define OPTIONS "oiOI" // options for flags, for example -o <arg>, -i <arg>, ...
 
 struct data {
@@ -24,7 +24,6 @@ write_file(char*, int);
 
 int main(int argc, char** argv) {
     data input, output;
-    FILE* outputFile;
 
     // set defaults
     input.flag = 'i';
@@ -47,30 +46,19 @@ int main(int argc, char** argv) {
     if (*end != '\0')
         fdOutput = 1;
 
-    // printf("input:\n\t- flag: %c\n\t- file_name: %s\n\t- fd: %d\n", input.flag, input.file_name, fdInput);
-    // printf("output:\n\t- flag: %c\n\t- file_name: %s\n\t- fd: %d\n", output.flag, output.file_name, fdOutput);
-
     // open file if user specified it
     int is_opened_input = 0;
     if (*(input.file_name)) {
-        fdInput = open(input.file_name, O_RDWR);
+        fdInput = open(input.file_name, O_RDONLY);
         if (fdInput == -1)
             handle_error("Error: unable to open input file.");
 
         is_opened_input = 1;
     }
 
-    int is_opened_output = 0;
+    int is_opened_output = 0 /*, is_opened_file = 0 */;
     if (*(output.file_name)) {
-        fdOutput = open(output.file_name, O_RDWR);
-        if (fdOutput == -1) {
-            outputFile = fopen(output.file_name, "w");
-
-            if (!outputFile)
-                handle_error("Error: unable to create file.");
-        }
-
-        fdOutput = open(output.file_name, O_RDWR);
+        fdOutput = open(output.file_name, O_RDWR | O_CREAT, 0666);
         if (fdOutput == -1)
             handle_error("Error: unable to open output file.");
 
@@ -110,9 +98,6 @@ int main(int argc, char** argv) {
 
     if (is_opened_output)
         close(fdOutput);
-
-    if (outputFile)
-        fclose(outputFile);
 }
 
 void handle_error(const char* message) {
