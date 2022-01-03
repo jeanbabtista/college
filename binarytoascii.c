@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
         is_opened_input = 1;
     }
 
-    int is_opened_output = 0 /*, is_opened_file = 0 */;
+    int is_opened_output = 0;
     if (*(output.file_name)) {
         fdOutput = open(output.file_name, O_RDWR | O_CREAT, 0666);
         if (fdOutput == -1)
@@ -65,12 +65,13 @@ int main(int argc, char** argv) {
         is_opened_output = 1;
     }
 
+    // all bytes
     unsigned size = 0;
     int bytes[MAX];
 
     // read file
     while (1) {
-        // set reading / writing buffer
+        // buffer always reads one character
         const unsigned length = 1;
         char buffer[length];
 
