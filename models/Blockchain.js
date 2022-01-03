@@ -61,7 +61,6 @@ class Blockchain {
           const b = new Block(block.index, block.data, block.difficulty, block.previousHash)
           b.hash = block.hash
           b.nonce = block.nonce
-          b.hash = block.hash
           b.timestamp = block.timestamp
 
           return b
