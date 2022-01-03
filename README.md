@@ -2,7 +2,7 @@
 
 ## Test commands
 
-| Command (first `cd build/`)                                                   |
+| Commands (first `cd build/`)                                                  |
 | ----------------------------------------------------------------------------- |
 | `./binarytoascii -i ../data/data_byte.bin`                                    |
 | `cat ../data/data_byte.bin \| ./binarytoascii`                                |
