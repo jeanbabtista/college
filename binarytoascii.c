@@ -10,61 +10,97 @@
 #define MAX 1000
 #define OPTIONS "oiOI" // options for flags, for example -o <arg>, -i <arg>, ...
 
-void
-parse_args(char*, char*, char*, char*, int, char**),
+struct data {
+    char flag;
+    char file_name[MAX];
+    char fd[MAX];
+} typedef data;
+
+void parse_args(data*, data*, int, char**),
 handle_error(const char*),
 copy(char*, char*),
 read_file(char*, int),
 write_file(char*, int);
 
 int main(int argc, char** argv) {
-    char
-        file_name[MAX],
-        file_descriptor[MAX],
-        first_flag,
-        second_flag;
+    data input, output;
 
-    // set file_name, file_descriptor to correct values from command-line arguments
-    // and set first_flag either to 'o' or 'i' and second_flag to 'O' or 'I'
-    parse_args(file_name, file_descriptor, &first_flag, &second_flag, argc, argv);
+    // set defaults
+    input.flag = 'i';
+    strcpy(input.fd, "0");
+    strcpy(input.file_name, "");
+    output.flag = 'o';
+    strcpy(output.fd, "1");
+    strcpy(output.file_name, "");
 
-    // convert file_descriptor to number
+    // parse arguments
+    parse_args(&input, &output, argc, argv);
+
+    // convert file descriptors to numbers
     char* end;
-    int fd = strtol(file_descriptor, &end, 10);
+    int fdInput = strtol(input.fd, &end, 10);
     if (*end != '\0')
-        fd = 0;
+        fdInput = 0;
+
+    int fdOutput = strtol(output.fd, &end, 10);
+    if (*end != '\0')
+        fdOutput = 1;
+
+    printf("input:\n\t- flag: %c\n\t- file_name: %s\n\t- fd: %d\n", input.flag, input.file_name, fdInput);
+    printf("output:\n\t- flag: %c\n\t- file_name: %s\n\t- fd: %d\n", output.flag, output.file_name, fdOutput);
 
     // open file if user specified it
-    int is_opened = 0;
-    if (*file_name) {
-        fd = open(file_name, O_RDWR);
-        printf("Opened file %s\n", file_name);
-        printf("Opened fd: %d\n", fd);
-        is_opened = 1;
+    int is_opened_input = 0;
+    if (*(input.file_name)) {
+        fdInput = open(input.file_name, O_RDWR);
+        if (fdInput == -1)
+            handle_error("Error: unable to open input file.");
+
+        is_opened_input = 1;
     }
 
-    // set reading / writing buffer
-    const unsigned length = 1;
-    char buffer[length + 1];
+    int is_opened_output = 0;
+    if (*(output.file_name)) {
+        fdOutput = open(output.file_name, O_RDWR);
+        if (fdOutput == -1)
+            handle_error("Error: unable to open output file.");
+
+        is_opened_output = 1;
+    }
+
+    unsigned size = 0;
+    int bytes[MAX];
 
     // read file
-    printf("Read: ");
     while (1) {
-        int r = read(fd, buffer, length);
-        buffer[r] = '\0';
+        // set reading / writing buffer
+        const unsigned length = 1;
+        char buffer[length];
 
+        int r = read(fdInput, buffer, length);
         if (r <= 0)
             break;
 
-        printf("%d ", buffer[0]);
+        bytes[size++] = (int)buffer[0];
     }
-    printf("\n");
 
-    // close file if opened
-    if (is_opened) {
-        printf("Closing opened fd %d\n", fd);
-        close(fd);
+    // write to fd
+    for (unsigned i = 0; i < size; i++) {
+        char byte[MAX];
+        const int size = sprintf(byte, "%d", bytes[i]);
+
+        write(fdOutput, byte, size);
+        write(fdOutput, " ", sizeof(char));
     }
+
+    write(fdOutput, "\n", sizeof(char));
+
+    // close file
+    if (is_opened_input)
+        close(fdInput);
+
+    if (is_opened_output)
+        close(fdOutput);
 }
 
 void handle_error(const char* message) {
@@ -78,16 +114,12 @@ void copy(char* dest, char* src) {
     dest[strlen(src)] = '\0';
 }
 
-void parse_args(char* file_name, char* file_descriptor, char* first_flag, char* second_flag, int argc, char** argv) {
+void parse_args(data* input, data* output, int argc, char** argv) {
     argc--;
     argv++;
 
     if (argc % 2)
         handle_error("Error: wrong number of arguments supplied. Every flag requires a value.");
-
-    char
-        * values[2] = { "", "0" },
-        flags[2] = ""; // ~ flag[2] = {0, 0};
 
     for (unsigned i = 0; i < argc - 1 && argc > 0; i += 2) {
         /* flags are at indexes 0, 2, 4, ...
@@ -112,29 +144,25 @@ void parse_args(char* file_name, char* file_descriptor, char* first_flag, char* 
         if (!valid)
             handle_error("Error: flag option is invalid. Available options are 'o', 'i', 'O' and 'I'.");
 
-        char* arg = argv[i + 1];
+        char* value = argv[i + 1];
 
         switch (option) {
         case 'o':
-        case 'i':
-            flags[0] = option;
-            values[0] = arg;
+            output->flag = option;
+            strcpy(output->file_name, value);
             break;
         case 'O':
-        case 'I':
-            flags[1] = option;
-            values[1] = arg;
+            output->flag = option;
+            strcpy(output->fd, value);
             break;
-        default:
-            handle_error("Error: wrong switch case value.");
+        case 'i':
+            input->flag = option;
+            strcpy(input->file_name, value);
+            break;
+        case 'I':
+            input->flag = option;
+            strcpy(input->fd, value);
+            break;
         }
     }
-
-    // set arguments visible in main function
-    copy(file_name, values[0]);
-    copy(file_descriptor, values[1]);
-
-    // set flags
-    *first_flag = flags[0];
-    *second_flag = flags[1];
 }
