@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(reading_speed)
+project(history_characters)
 
-add_executable(reading_speed histZnakov.cpp)
+add_executable(histZnakov histZnakov.cpp)

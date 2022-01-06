@@ -1,46 +1,77 @@
 #include <iostream>
+#include <string>
+#include <map>
+#include <fstream>
+#include <chrono>
 #include <unistd.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-/* Navodila
-Pripravite tudi kratko poročilo v katerem izpišete rezultate in komentirate na učinkovitost branja podatkov z read, fread in mmap klicem. S program preizkusite branje datotek različnih velikosti - 256 B, 512B, 1KB, 256KB, 512KB, 1MB, 256MB. Za mmap te teste izvedete enkrat, za read in fread pa te teste ponovitve za različne velikosti predpomnilnika: 1B, 256B, 512B, 1KB, 2KB, 4KB, 8KB in 16KB. Na standardni izhod nato izpišite histogram.
-Čas izvajanja lahko izmerite z ukazom time.
-*/
+enum class ReadType { read, fread, mmap, none };
 
-// read(), ifstream.read(), mmap()
+class Data {
+public:
+    unsigned bufferSize;
+    ReadType readType;
+    std::string file;
 
-// -t <tip branja - read, fread, mmap>
-// -b <velikost predpomnilnika v bajtih, le pri read in fread, pri mmap pa ne!>
+    const std::string options;
 
-/* Primeri
-$ echo hello world > besedilo.txt
-$ ./histZnakov -b 10 -t read besedilo.txt
-d - 1
-e - 1
-h - 1
-l - 3
-o - 2
-r - 1
-w - 1
+    Data() : options("btf"), bufferSize(0), readType(ReadType::none), file("") {}
+};
 
-$ echo aa bc ddd ef > besedilo.txt
-$ ./histZnakov -b 10 -t mmap besedilo.txt
-a - 2
-b - 1
-c - 1
-d - 3
-e - 1
-f - 1
-*/
+class AsciiMap {
+private:
+    const unsigned
+        min,
+        max;
 
-static constexpr char OPTIONS[] = "bt";
+public:
+    std::map<char, unsigned> map;
 
-enum class ReadType { read, fread, mmap };
+    AsciiMap() : min(33), max(128) {
+        for (auto i = min; i < max; i++)
+            map[i] = 0;
+    }
 
-void parseArgs(unsigned*, ReadType*, int, char**);
+    inline void insert(char c) {
+        const auto cInt = static_cast<unsigned>(c);
 
-int main() {
-    std::cout << "Hello World!" << std::endl;
-    return 0;
+        if (cInt < min || cInt > max)
+            return;
+
+        map[c]++;
+    }
+
+    const void print() const {
+        for (const auto& element : map)
+            if (element.second > 0)
+                std::cout << element.first << " - " << element.second << std::endl;
+    }
+};
+
+void parseArgs(Data&&, int, char**), printArgs(Data&&), getStats(Data&&, AsciiMap&&);
+
+int main(int argc, char** argv) {
+    Data data;
+    AsciiMap ascii;
+
+    // handle arguments
+    parseArgs(std::move(data), argc, argv);
+    // printArgs(std::move(data));
+
+    // histogram statistics
+    const auto start = std::chrono::high_resolution_clock::now();
+    getStats(std::move(data), std::move(ascii));
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    // print map
+    std::cout << "Histogram:" << std::endl;
+    ascii.print();
+
+    // print time
+    std::cout << "\nTime taken: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds." << std::endl;
 }
 
 void handleError(const std::string& message) {
@@ -48,12 +79,9 @@ void handleError(const std::string& message) {
     exit(-1);
 }
 
-void parseArgs(unsigned* size_buffer, ReadType* read_type, int argc, char** argv) {
+void parseArgs(Data&& data, int argc, char** argv) {
     argc--;
     argv++;
-
-    if (argc % 2)
-        handleError("wrong number of arguments supplied. Every flag requires a value.");
 
     for (auto i = 0; i < argc - 1 && argc > 0; i += 2) {
         /* flags are at indexes 0, 2, 4, ...
@@ -68,24 +96,140 @@ void parseArgs(unsigned* size_buffer, ReadType* read_type, int argc, char** argv
             handleError("flag has to start with '-'.");
 
         const auto option = flag[1];
-        const auto options = std::string(OPTIONS);
+        const auto options = data.options;
 
         // check if flag option is valid
         auto valid = false;
-        for (auto j = 0; j < options.length(); j++)
-            if (option == OPTIONS[j])
+        for (const auto& availableOption : options)
+            if (option == availableOption)
                 valid = true;
 
         if (!valid)
-            handleError("flag option is invalid. Available options are 'b' and 't'.");
+            handleError("flag option is invalid. Available options are 'b', 't', 'f'.");
 
-        const auto value = argv[i + 1];
+        const auto value = std::string(argv[i + 1]);
 
         switch (option) {
         case 'b':
+            try {
+                data.bufferSize = static_cast<unsigned>(stoi(value));
+            }
+            catch (...) {
+                handleError("invalid argument passed as buffer size.");
+            }
+
             break;
         case 't':
+            data.readType =
+                value == "read" ? ReadType::read
+                : value == "fread" ? ReadType::fread
+                : value == "mmap" ? ReadType::mmap
+                : ReadType::none;
+
+            break;
+        case 'f':
+            data.file = value;
             break;
         }
+    }
+
+    if (data.bufferSize == 0)
+        handleError("you have to provide valid buffer size.");
+
+    if (data.readType == ReadType::none)
+        handleError("you have to provide valid read type function [read, fread, mmap].");
+
+    if (!data.file.length())
+        handleError("file name cannot be empty.");
+}
+
+void printArgs(Data&& data) {
+    std::cout << "buffer size: " << data.bufferSize << ", read type: ";
+
+    switch (data.readType) {
+    case ReadType::read:
+        std::cout << "read";
+        break;
+    case ReadType::fread:
+        std::cout << "fread";
+        break;
+    case ReadType::mmap:
+        std::cout << "mmap";
+        break;
+    }
+
+    std::cout << ", file: " << data.file << std::endl;
+}
+
+void getStats(Data&& data, AsciiMap&& ascii) {
+    switch (data.readType) {
+    case ReadType::read: {
+        // open file
+        const auto fd = open(data.file.c_str(), O_RDONLY);
+        if (fd == -1)
+            handleError("unable to open file.");
+
+        // read file
+        while (true) {
+            char buffer[data.bufferSize + 1] = "\0";
+            int r = read(fd, buffer, data.bufferSize);
+
+            if (r <= 0)
+                break;
+
+            // insert into map
+            for (const auto& c : std::string(buffer))
+                ascii.insert(c);
+        }
+
+        // close file
+        close(fd);
+        break;
+    }
+    case ReadType::fread: {
+        // open file
+        std::ifstream file(data.file);
+        if (!file.is_open())
+            handleError("unable to open file.");
+
+        // read file
+        while (file.good()) {
+            char buffer[data.bufferSize + 1] = "\0";
+            file.read(buffer, data.bufferSize);
+
+            // insert into map
+            for (const auto& c : std::string(buffer))
+                ascii.insert(c);
+        }
+
+        // close file
+        file.close();
+        break;
+    }
+    case ReadType::mmap:
+        // open file
+        const auto fd = open(data.file.c_str(), O_RDONLY);
+        if (fd == -1)
+            handleError("unable to open file.");
+
+        struct stat file_stats;
+        if (fstat(fd, &file_stats) == -1)
+            handleError("file_stats structure error.");
+
+        const auto size = file_stats.st_size;
+
+        auto data = static_cast<char*>(mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0));
+        if (data == MAP_FAILED)
+            handleError("mmap function error.");
+
+        for (const auto& c : std::string(data))
+            ascii.insert(c);
+
+        if (munmap(data, size) == -1)
+            handleError("munmap function error.");
+
+        // close file
+        close(fd);
+        break;
     }
 }
