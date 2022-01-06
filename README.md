@@ -9,7 +9,7 @@
 
 # Commands
 
-| command                                 |
-| --------------------------------------- |
-| ./histZnakov -b 10 -t read file.txt     |
-| ./histZnakov -b 10 -t mmap besedilo.txt |
+| command                                   |
+| ----------------------------------------- |
+| `./histZnakov -b 10 -t read file.txt`     |
+| `./histZnakov -b 10 -t mmap besedilo.txt` |
