@@ -67,11 +67,11 @@ int main(int argc, char** argv) {
     const auto end = std::chrono::high_resolution_clock::now();
 
     // print map
-    std::cout << "Histogram:" << std::endl;
-    ascii.print();
+    // std::cout << "Histogram:" << std::endl;
+    // ascii.print();
 
     // print time
-    std::cout << "\nTime taken: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds." << std::endl;
+    std::cout << "\nTime: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " us." << std::endl;
 }
 
 void handleError(const std::string& message) {

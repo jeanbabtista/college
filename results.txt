@@ -1,0 +1,257 @@
+
+---------------------------------------
+function: read, buffer: 1
+b_256.txt
+Time taken: 116 microseconds.
+b_512.txt
+Time taken: 219 microseconds.
+kb_1.txt
+Time taken: 438 microseconds.
+kb_256.txt
+Time taken: 155384 microseconds.
+kb_512.txt
+Time taken: 225718 microseconds.
+mb_1.txt
+Time taken: 480305 microseconds.
+
+---------------------------------------
+function: read, buffer: 256
+b_256.txt
+Time taken: 38 microseconds.
+b_512.txt
+Time taken: 75 microseconds.
+kb_1.txt
+Time taken: 131 microseconds.
+kb_256.txt
+Time taken: 36552 microseconds.
+kb_512.txt
+Time taken: 78031 microseconds.
+mb_1.txt
+Time taken: 161341 microseconds.
+
+---------------------------------------
+function: read, buffer: 512
+b_256.txt
+Time taken: 41 microseconds.
+b_512.txt
+Time taken: 71 microseconds.
+kb_1.txt
+Time taken: 130 microseconds.
+kb_256.txt
+Time taken: 41149 microseconds.
+kb_512.txt
+Time taken: 67659 microseconds.
+mb_1.txt
+Time taken: 127852 microseconds.
+
+---------------------------------------
+function: read, buffer: 1024
+b_256.txt
+Time taken: 41 microseconds.
+b_512.txt
+Time taken: 73 microseconds.
+kb_1.txt
+Time taken: 135 microseconds.
+kb_256.txt
+Time taken: 33431 microseconds.
+kb_512.txt
+Time taken: 67049 microseconds.
+mb_1.txt
+Time taken: 128416 microseconds.
+
+---------------------------------------
+function: read, buffer: 2048
+b_256.txt
+Time taken: 41 microseconds.
+b_512.txt
+Time taken: 72 microseconds.
+kb_1.txt
+Time taken: 130 microseconds.
+kb_256.txt
+Time taken: 33991 microseconds.
+kb_512.txt
+Time taken: 64738 microseconds.
+mb_1.txt
+Time taken: 129717 microseconds.
+
+---------------------------------------
+function: read, buffer: 4096
+b_256.txt
+Time taken: 43 microseconds.
+b_512.txt
+Time taken: 74 microseconds.
+kb_1.txt
+Time taken: 137 microseconds.
+kb_256.txt
+Time taken: 35966 microseconds.
+kb_512.txt
+Time taken: 101376 microseconds.
+mb_1.txt
+Time taken: 291852 microseconds.
+
+---------------------------------------
+function: read, buffer: 8192
+b_256.txt
+Time taken: 48 microseconds.
+b_512.txt
+Time taken: 526 microseconds.
+kb_1.txt
+Time taken: 139 microseconds.
+kb_256.txt
+Time taken: 77270 microseconds.
+kb_512.txt
+Time taken: 147969 microseconds.
+mb_1.txt
+Time taken: 172138 microseconds.
+
+---------------------------------------
+function: read, buffer: 16384
+b_256.txt
+Time taken: 51 microseconds.
+b_512.txt
+Time taken: 81 microseconds.
+kb_1.txt
+Time taken: 148 microseconds.
+kb_256.txt
+Time taken: 73306 microseconds.
+kb_512.txt
+Time taken: 138867 microseconds.
+mb_1.txt
+Time taken: 267595 microseconds.
+
+
+---------------------------------------
+function: fread, buffer: 1
+b_256.txt
+Time taken: 89 microseconds.
+b_512.txt
+Time taken: 137 microseconds.
+kb_1.txt
+Time taken: 256 microseconds.
+kb_256.txt
+Time taken: 140542 microseconds.
+kb_512.txt
+Time taken: 253058 microseconds.
+mb_1.txt
+Time taken: 429598 microseconds.
+
+---------------------------------------
+function: fread, buffer: 256
+b_256.txt
+Time taken: 64 microseconds.
+b_512.txt
+Time taken: 84 microseconds.
+kb_1.txt
+Time taken: 150 microseconds.
+kb_256.txt
+Time taken: 33440 microseconds.
+kb_512.txt
+Time taken: 79731 microseconds.
+mb_1.txt
+Time taken: 143857 microseconds.
+
+---------------------------------------
+function: fread, buffer: 512
+b_256.txt
+Time taken: 58 microseconds.
+b_512.txt
+Time taken: 86 microseconds.
+kb_1.txt
+Time taken: 1837 microseconds.
+kb_256.txt
+Time taken: 36370 microseconds.
+kb_512.txt
+Time taken: 87160 microseconds.
+mb_1.txt
+Time taken: 203598 microseconds.
+
+---------------------------------------
+function: fread, buffer: 1024
+b_256.txt
+Time taken: 60 microseconds.
+b_512.txt
+Time taken: 99 microseconds.
+kb_1.txt
+Time taken: 161 microseconds.
+kb_256.txt
+Time taken: 66016 microseconds.
+kb_512.txt
+Time taken: 126110 microseconds.
+mb_1.txt
+Time taken: 176915 microseconds.
+
+---------------------------------------
+function: fread, buffer: 2048
+b_256.txt
+Time taken: 57 microseconds.
+b_512.txt
+Time taken: 93 microseconds.
+kb_1.txt
+Time taken: 150 microseconds.
+kb_256.txt
+Time taken: 36492 microseconds.
+kb_512.txt
+Time taken: 102271 microseconds.
+mb_1.txt
+Time taken: 146762 microseconds.
+
+---------------------------------------
+function: fread, buffer: 4096
+b_256.txt
+Time taken: 60 microseconds.
+b_512.txt
+Time taken: 91 microseconds.
+kb_1.txt
+Time taken: 149 microseconds.
+kb_256.txt
+Time taken: 33913 microseconds.
+kb_512.txt
+Time taken: 78992 microseconds.
+mb_1.txt
+Time taken: 142046 microseconds.
+
+---------------------------------------
+function: fread, buffer: 8192
+b_256.txt
+Time taken: 59 microseconds.
+b_512.txt
+Time taken: 91 microseconds.
+kb_1.txt
+Time taken: 149 microseconds.
+kb_256.txt
+Time taken: 33560 microseconds.
+kb_512.txt
+Time taken: 89755 microseconds.
+mb_1.txt
+Time taken: 227414 microseconds.
+
+---------------------------------------
+function: fread, buffer: 16384
+b_256.txt
+Time taken: 62 microseconds.
+b_512.txt
+Time taken: 97 microseconds.
+kb_1.txt
+Time taken: 156 microseconds.
+kb_256.txt
+Time taken: 80830 microseconds.
+kb_512.txt
+Time taken: 116668 microseconds.
+mb_1.txt
+Time taken: 175967 microseconds.
+
+
+---------------------------------------
+function: mmap, buffer: 1
+b_256.txt
+Time taken: 62 microseconds.
+b_512.txt
+Time taken: 80 microseconds.
+kb_1.txt
+Time taken: 171 microseconds.
+kb_256.txt
+Time taken: 79997 microseconds.
+kb_512.txt
+Time taken: 122036 microseconds.
+mb_1.txt
+Time taken: 154846 microseconds.

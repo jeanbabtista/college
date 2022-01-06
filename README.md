@@ -21,6 +21,9 @@
 
 ## File sizes
 
+- program for generating random files with fixed sizes:
+  https://onlinefiletools.com/generate-random-text-file
+
 - 256 B
 - 512 B
 - 1 kB
