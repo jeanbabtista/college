@@ -1,0 +1,3 @@
+/home/zan/Desktop/faks/OS/hist_characters/build/CMakeFiles/rebuild_cache.dir
+/home/zan/Desktop/faks/OS/hist_characters/build/CMakeFiles/edit_cache.dir
+/home/zan/Desktop/faks/OS/hist_characters/build/CMakeFiles/reading_speed.dir
