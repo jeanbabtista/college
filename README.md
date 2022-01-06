@@ -1,10 +1,10 @@
 # Examples
 
-| flag | use                                        |
-| ---- | ------------------------------------------ |
-| -t   | -t &ltfunction name - read, fread, mmap&gt |
-| -b   | -b &ltsize of buffer&gt                    |
-| -f   | -f &ltfile name&gt                         |
+| flag | use                                          |
+| ---- | -------------------------------------------- |
+| -t   | -t &lt;function name - read, fread, mmap&gt; |
+| -b   | -b &lt;size of buffer&gt;                    |
+| -f   | -f &lt;file name&gt;                         |
 
 - <em>-b</em> only works with `read()` and `fread()`
 
