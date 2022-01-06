@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/reading_speed.dir/histZnakov.cpp.o -o reading_speed 
