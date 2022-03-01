@@ -1,0 +1,12 @@
+{
+    "name": "vendor/sp-vaja-1",
+    "require": {
+      "vlucas/phpdotenv": "^5.4",
+      "ext-mysqli": "*"
+    },
+    "autoload": {
+        "psr-4": {
+          "App\\": "src/"
+        }
+    }
+}
