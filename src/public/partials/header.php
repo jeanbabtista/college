@@ -1,16 +1,20 @@
 <?php
 
 require_once __DIR__ . '/../../config/database.php';
-session_start();
+require_once '../utils/session.php';
 
 // connect to database
 $db = new Database();
 $db->connect();
 
 // initialize session
+session_start();
 if (isset($_SESSION['LAST_ACTIVITY']) && time() - $_SESSION['LAST_ACTIVITY'] < 1800)
     session_regenerate_id(true);
 $_SESSION['LAST_ACTIVITY'] = time();
+
+// get user from session (if exists)
+$user = getUserFromSession();
 
 ?>
 

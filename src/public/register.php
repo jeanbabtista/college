@@ -15,7 +15,10 @@ function validate(): string {
     if (!$username)
         return 'Error: username cannot be empty';
 
-    // check passwords
+    // check password
+    if (!$password)
+        return 'Error: password cannot be empty';
+
     if ($password !== $repeat)
         return 'Error: passwords do not match';
 
@@ -36,10 +39,9 @@ function validate(): string {
     redirectToLogin();
 }
 
-validate();
 ?>
 
-<div class="flex items-center justify-center" id="register">
+<div class="auth flex items-center justify-center mt-28">
     <div class="bg-white p-16 rounded shadow-2xl w-2/3">
         <h2 class="text-3xl font-bold mb-10 text-gray-800">Register</h2>
 

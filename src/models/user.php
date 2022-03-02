@@ -28,10 +28,33 @@ class User {
 
         $username = $conn->real_escape_string($username);
         $password = sha1($password);
+
         list('error' => $error, 'message' => $message, 'data' => $data) = $db->query(
             "INSERT INTO user (username, password) VALUES ('$username', '$password')"
         );
 
         return getErrorObject($error, $error ? 'Data from query is null' : 'Successfully fetched data', $data);
+    }
+
+    #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "\bool|mysqli_result"])]
+    static function login(string $username, string $password, Database $db): array {
+        $conn = $db->getConnection();
+        if (!$conn)
+            return getErrorObject(true, 'Error: database is not connected');
+
+        $username = $conn->real_escape_string($username);
+        $password = sha1($password);
+
+        list('error' => $error, 'message' => $message, 'data' => $data) = $db->query(
+            "SELECT * FROM user WHERE username='$username' AND password='$password'"
+        );
+
+        if ($error || !$data)
+            return getErrorObject(true, $message);
+
+        $user = $data->fetch_object();
+        if ($user)
+            return getErrorObject(false, 'Login successful', $user);
+        return getErrorObject(true, 'Error: unable to fetch user');
     }
 }

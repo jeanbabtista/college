@@ -51,21 +51,4 @@ class Database
             return getErrorObject(true, $this->conn->error);
         return getErrorObject(false, 'Successfully executed query ' . $query, $result);
     }
-
-    #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "\bool|mysqli_result"])]
-    public function createUserTable(): array
-    {
-        return $this->query("CREATE TABLE user (
-            id INT NOT NULL AUTO_INCREMENT,
-            username VARCHAR(100) NOT NULL,
-            password VARCHAR(100) NOT NULL,
-            primary key (id)
-        )");
-    }
-
-    #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "\bool|mysqli_result"])]
-    public function addUser(string $username, string $password): array
-    {
-        return $this->query("INSERT INTO user (username, password) VALUES ('$username', '$password')");
-    }
 }
