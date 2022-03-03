@@ -1,47 +1,39 @@
 <?php
 
-include_once './partials/header.php';
+require_once __DIR__ . 'partials/header.php';
 require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../utils/redirect.php';
 
 function validate(): string {
     if (!isset($_POST['submit']))
-        return "";
+        return '';
 
     global $db;
     list('username' => $username, 'password' => $password, 'repeat_password' => $repeat) = $_POST;
 
-    // check username
     if (!$username)
         return 'Error: username cannot be empty';
-
-    // check password
     if (!$password)
         return 'Error: password cannot be empty';
-
     if ($password !== $repeat)
         return 'Error: passwords do not match';
 
     // check if user exists
-    list ('error' => $_error, 'message' => $message, 'data' => $data) = User::exists($username, $db);
+    try {
+        if (!User::exists($username, $db)) {
+            User::register($username, $password, $db);
+            redirectToLogin();
+        }
+    } catch (Exception $e) {
+        return $e->getMessage();
+    }
 
-    if ($_error)
-        return $message;
-
-    if (!$data)
-        return 'Error: unknown error - data does not exist';
-
-    if ($data->num_rows)
-        return 'Error: username already exists';
-
-    // register user
-    User::register($username, $password, $db);
-    redirectToLogin();
+    return '';
 }
 
 ?>
 
-<div class="auth flex items-center justify-center mt-28">
+<div class="auth flex items-center justify-center">
     <div class="bg-white p-16 rounded shadow-2xl w-2/3">
         <h2 class="text-3xl font-bold mb-10 text-gray-800">Register</h2>
 

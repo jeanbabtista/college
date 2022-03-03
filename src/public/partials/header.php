@@ -1,11 +1,16 @@
 <?php
 
 require_once __DIR__ . '/../../config/database.php';
-require_once '../utils/session.php';
+require_once __DIR__ . '/../../utils/session.php';
 
 // connect to database
 $db = new Database();
-$db->connect();
+
+try {
+    $db->connect();
+} catch (Exception $e) {
+    echo $e->getMessage();
+}
 
 // initialize session
 session_start();
@@ -48,3 +53,5 @@ $user = getUserFromSession();
         </div>
     </div>
 </nav>
+
+<main class="mt-5">

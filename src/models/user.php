@@ -6,25 +6,31 @@ require_once __DIR__ . '/../public/partials/header.php';
 require_once __DIR__ . '/../utils/errorObject.php';
 
 class User {
-    #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "bool|mysqli_result"])]
-    static function exists(string $username, Database $db): array {
+    /**
+     * @throws Exception
+     */
+    static function exists(string $username, Database $db): bool {
         $conn = $db->getConnection();
         if (!$conn)
-            return getErrorObject(true, 'Error: database is not connected');
+            throw new Exception('Error: database is not connected');
 
         list('error' => $error, 'message' => $message, 'data' => $data) = $db->query(
             "SELECT * FROM user WHERE username='" . $conn->real_escape_string($username) . "'"
         );
 
-        return getErrorObject($error, $error ? 'Data from query is null' : 'Successfully fetched data', $data);
+       if ($data->num_rows)
+           return true;
+       return false;
     }
 
-    #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "\bool|mysqli_result"])]
-    static function register(string $username, string $password, Database $db): array
+    /**
+     * @throws Exception
+     */
+    static function register(string $username, string $password, Database $db)
     {
         $conn = $db->getConnection();
         if (!$conn)
-            return getErrorObject(true, 'Error: database is not connected');
+            throw new Exception('Error: database is not connected');
 
         $username = $conn->real_escape_string($username);
         $password = sha1($password);
@@ -33,14 +39,17 @@ class User {
             "INSERT INTO user (username, password) VALUES ('$username', '$password')"
         );
 
-        return getErrorObject($error, $error ? 'Data from query is null' : 'Successfully fetched data', $data);
+        if ($error)
+            throw new Exception($message);
     }
 
-    #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "\bool|mysqli_result"])]
-    static function login(string $username, string $password, Database $db): array {
+    /**
+     * @throws Exception
+     */
+    static function login(string $username, string $password, Database $db): ?mysqli_result {
         $conn = $db->getConnection();
         if (!$conn)
-            return getErrorObject(true, 'Error: database is not connected');
+            throw new Exception('Error: database is not connected');
 
         $username = $conn->real_escape_string($username);
         $password = sha1($password);
@@ -50,11 +59,11 @@ class User {
         );
 
         if ($error || !$data)
-            return getErrorObject(true, $message);
+            throw new Exception($message);
 
         $user = $data->fetch_object();
         if ($user)
-            return getErrorObject(false, 'Login successful', $user);
-        return getErrorObject(true, 'Error: unable to fetch user');
+            return $user;
+        return null;
     }
 }

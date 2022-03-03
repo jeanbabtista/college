@@ -2,7 +2,7 @@
 
 use JetBrains\PhpStorm\ArrayShape;
 
-require __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../utils/errorObject.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -30,15 +30,18 @@ class Database
         return $this->conn;
     }
 
-    #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "bool|mysqli_result"])]
-    public function connect(): array
+    /**
+     * @throws Exception
+     */
+    public function connect(): bool
     {
         try {
             $this->conn = new mysqli($this->host, $this->username, $this->password, $this->name);
             $this->conn->set_charset("UTF8");
-            return getErrorObject(false, 'Successfully connected to database');
+            $this->init();
+            return true;
         } catch (Exception $e) {
-            return getErrorObject(true, $e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
 
@@ -50,5 +53,55 @@ class Database
         if ($this->conn->errno)
             return getErrorObject(true, $this->conn->error);
         return getErrorObject(false, 'Successfully executed query ' . $query, $result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function init() {
+        $this->tryCreateUserTable();
+        $this->tryCreateAdsTable();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function tryCreateUserTable(): bool
+    {
+        list('error' => $error, 'message' => $message, 'data' => $data) = $this->query(
+            "CREATE TABLE IF NOT EXISTS user (
+                'id' INT NOT NULL AUTO_INCREMENT,
+                'username' VARCHAR(40) NOT NULL,
+                'password' VARCHAR(40) NOT NULL,
+                PRIMARY KEY ('id')
+            )"
+        );
+
+        if ($error)
+            throw new Exception($message);
+
+        return true;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function tryCreateAdsTable(): bool
+    {
+        list('error' => $error, 'message' => $message) = $this->query(
+            "CREATE TABLE IF NOT EXISTS ad (
+                'id' INT NOT NULL AUTO_INCREMENT,
+                'title' VARCHAR(40) NOT NULL,
+                'description' text NOT NULL,
+                'user_id' INT NOT NULL,
+                'image' longblob NOT NULL,
+                PRIMARY KEY ('id')
+            )"
+        );
+
+        if ($error)
+            throw new Exception($message);
+
+        return true;
     }
 }

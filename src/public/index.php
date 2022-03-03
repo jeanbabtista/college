@@ -1,5 +1,5 @@
 <?php
-include_once './partials/header.php';
+require_once __DIR__ . '/partials/header.php';
 global $user;
 
 ?>

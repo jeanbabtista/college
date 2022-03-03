@@ -1,40 +1,36 @@
 <?php
 
-include_once './partials/header.php';
+require_once __DIR__ . '/partials/header.php';
 require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../utils/redirect.php';
 
 function validate(): string {
     if (!isset($_POST['submit']))
-        return "";
+        return '';
 
     global $db;
     list('username' => $username, 'password' => $password) = $_POST;
 
-    // check username
     if (!$username)
         return 'Error: username cannot be empty';
-
-    // check password
     if (!$password)
         return 'Error: password cannot be empty';
 
-    list ('error' => $error, 'message' => $message, 'data' => $data) = User::login($username, $password, $db);
+    try {
+        $user = User::login($username, $password, $db);
+        if (!$user)
+            throw new Exception('Error: login failed');
 
-    if ($error)
-        return $message;
-
-    $user = $data;
-    if (!$user)
-        return 'Error: login failed';
-
-    $_SESSION['USER_ID'] = $user;
-    redirectToIndex();
+        $_SESSION['USER_ID'] = $user;
+        redirectToIndex();
+    } catch (Exception $e) {
+        return $e->getMessage();
+    }
 }
 
 ?>
 
-    <div class="auth flex items-center justify-center mt-28">
+    <div class="auth flex items-center justify-center">
         <div class="bg-white p-16 rounded shadow-2xl w-2/3">
             <h2 class="text-3xl font-bold mb-10 text-gray-800">Login</h2>
 
