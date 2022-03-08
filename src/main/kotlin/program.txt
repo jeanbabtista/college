@@ -1,0 +1,14 @@
+num := 10;
+faculty:=1;
+for i := 0 to num - 1 do
+     faculty:= faculty * i
+done;
+
+foa :=2.5;
+
+
+dona :=10;
+
+WRITE faculty
+
+WRITa
