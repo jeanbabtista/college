@@ -2,22 +2,72 @@ import java.time.LocalDateTime
 import java.util.*
 
 class Invoice (
-    private var items: Items
+    private var items: Items,
+    private var invoiceName: String,
+    private var location: String,
+    private var merchantName: String,
+    private var paymentMethod: String = "cash"
 ) {
-    val id = UUID.randomUUID().toString()
-    val barcode = "random-barcode-string-to-implement"
-    private val date = LocalDateTime.now()
-    private val tax = .195
+    // values
+    private val id = UUID.randomUUID().toString()
+    private val barcode = "(01)00614141987658"
+    private val dateCreated = LocalDateTime.now()
+    private var dateModified = LocalDateTime.now()
 
-    private fun getDate(): String = "${date.dayOfMonth}. ${date.monthValue}. ${date.year}"
+    // getters
+    private fun getDateString() = "${dateCreated.dayOfMonth}. ${dateCreated.monthValue}. ${dateCreated.year}"
 
+    fun print() = println(toString())
+
+    // setters
+    fun setInvoiceName(_invoiceName: String) {
+        dateModified = LocalDateTime.now()
+        invoiceName = _invoiceName
+    }
+
+    fun setLocation(_location: String) {
+        dateModified = LocalDateTime.now()
+        location = _location
+    }
+
+    fun setMerchantName(_merchantName: String) {
+        dateModified = LocalDateTime.now()
+        merchantName = _merchantName
+    }
+
+    fun setPaymentMethod(_paymentMethod: String) {
+        dateModified = LocalDateTime.now()
+        paymentMethod = _paymentMethod
+    }
+
+    // other
     override fun toString(): String {
-        var temp = String()
+        // header
+        Printer.addTextLn(invoiceName)
+        Printer.addTextLn("Invoice ID: $id")
+        Printer.addTextLn("Location: $location, ${getDateString()}")
+        Printer.addLn()
 
-        temp += "(${getDate()}) Invoice\n"
-        temp += items
-        temp += "------------------------------------------------------------\n"
+        Printer.addText(items.toString())
+        Printer.addTextLn("To pay (EUR): ${roundToTwoDecimals(items.getTotalPrice())}")
+        Printer.addLn()
 
-        return temp
+        // general information
+        Printer.addTextLn("Payment method: $paymentMethod")
+        Printer.addTextLn("Invoiced by: $merchantName")
+        Printer.addLn()
+
+        Printer.addTextLn("All prices in EUR")
+        Printer.addTextLn("DDV included in price")
+        Printer.addLn()
+
+        // other
+        Printer.addTextLn("Thank you for visiting us!")
+        Printer.addLn()
+
+        Printer.addTextLn("ID: $id")
+        Printer.addTextLn("Barcode: $barcode")
+
+        return Printer.toStringAndReset()
     }
 }
