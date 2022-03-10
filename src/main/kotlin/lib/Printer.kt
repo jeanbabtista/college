@@ -1,3 +1,5 @@
+package lib
+
 class Printer {
     companion object {
         private const val columnLength = 20

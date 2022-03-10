@@ -1,3 +1,7 @@
+package invoice
+
+import lib.Printer
+import lib.roundToTwoDecimals
 import java.time.LocalDateTime
 import java.util.*
 
@@ -5,7 +9,8 @@ class Invoice (
     private var items: Items,
     private var invoiceName: String,
     private var location: String,
-    private var merchantName: String,
+    private var issuerName: String,
+    private var cashierName: String,
     private var paymentMethod: String = "cash"
 ) {
     // values
@@ -16,6 +21,7 @@ class Invoice (
 
     // getters
     private fun getDateString() = "${dateCreated.dayOfMonth}. ${dateCreated.monthValue}. ${dateCreated.year}"
+    fun getInvoiceNumber() = id
 
     fun print() = println(toString())
 
@@ -32,7 +38,7 @@ class Invoice (
 
     fun setMerchantName(_merchantName: String) {
         dateModified = LocalDateTime.now()
-        merchantName = _merchantName
+        cashierName = _merchantName
     }
 
     fun setPaymentMethod(_paymentMethod: String) {
@@ -44,7 +50,7 @@ class Invoice (
     override fun toString(): String {
         // header
         Printer.addTextLn(invoiceName)
-        Printer.addTextLn("Invoice ID: $id")
+        Printer.addTextLn("classes.Invoice ID: ${getInvoiceNumber()}")
         Printer.addTextLn("Location: $location, ${getDateString()}")
         Printer.addLn()
 
@@ -54,19 +60,18 @@ class Invoice (
 
         // general information
         Printer.addTextLn("Payment method: $paymentMethod")
-        Printer.addTextLn("Invoiced by: $merchantName")
+        Printer.addTextLn("Issued by: $issuerName")
+        Printer.addTextLn("Invoiced by: $cashierName")
         Printer.addLn()
 
         Printer.addTextLn("All prices in EUR")
         Printer.addTextLn("DDV included in price")
+        Printer.addTextLn("Barcode: $barcode")
         Printer.addLn()
 
         // other
         Printer.addTextLn("Thank you for visiting us!")
         Printer.addLn()
-
-        Printer.addTextLn("ID: $id")
-        Printer.addTextLn("Barcode: $barcode")
 
         return Printer.toStringAndReset()
     }

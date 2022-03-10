@@ -1,3 +1,8 @@
+package invoice
+
+import lib.Printer
+import lib.roundPercentage
+import lib.roundToTwoDecimals
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -48,11 +53,11 @@ class Item (
     override fun toString(): String {
         Printer.addColumn(name)
         Printer.addColumn(quantity.toString())
-        Printer.addColumn(roundToTwoDecimals(pricePerPiece).toString())
-        Printer.addColumn(roundToTwoDecimals(getNetPriceWithoutDiscount()).toString())
-        Printer.addColumn(roundPercentage(discount).toString())
-        Printer.addColumn(roundPercentage(taxRate).toString())
-        Printer.addColumn(roundToTwoDecimals(getTotalPrice()).toString())
+        Printer.Companion.addColumn(roundToTwoDecimals(pricePerPiece).toString())
+        Printer.Companion.addColumn(roundToTwoDecimals(getNetPriceWithoutDiscount()).toString())
+        Printer.Companion.addColumn(roundPercentage(discount).toString())
+        Printer.Companion.addColumn(roundPercentage(taxRate).toString())
+        Printer.Companion.addColumn(roundToTwoDecimals(getTotalPrice()).toString())
 
         return Printer.toStringAndReset()
     }

@@ -1,3 +1,6 @@
+package invoice
+
+import lib.Printer
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -62,7 +65,8 @@ class Items {
             if (i != items.count() - 1)
                 Printer.addLn()
             else
-                Printer.addText(' ') }
+                Printer.addText(' ')
+        }
 
         Printer.addLine('=', 7)
 

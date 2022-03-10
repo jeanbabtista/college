@@ -1,3 +1,7 @@
+import invoice.Invoice
+import invoice.Item
+import invoice.Items
+
 fun main() {
     try {
         val items = Items()
@@ -11,6 +15,7 @@ fun main() {
             items,
             "EAT SMART",
             "MB, Koroška cesta",
+            "Eat smart FERI d.o.o",
             "Žan Bedrač"
         )
 
