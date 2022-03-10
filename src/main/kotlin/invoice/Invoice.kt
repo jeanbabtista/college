@@ -1,15 +1,16 @@
 package invoice
 
+import company.Company
 import lib.Printer
+import lib.getDateString
 import lib.roundToTwoDecimals
 import java.time.LocalDateTime
 import java.util.*
 
 class Invoice (
     private var items: Items,
-    private var invoiceName: String,
-    private var location: String,
-    private var issuerName: String,
+    private var issuer: Company,
+    private var customerName: String,
     private var cashierName: String,
     private var paymentMethod: String = "cash"
 ) {
@@ -20,25 +21,19 @@ class Invoice (
     private var dateModified = LocalDateTime.now()
 
     // getters
-    private fun getDateString() = "${dateCreated.dayOfMonth}. ${dateCreated.monthValue}. ${dateCreated.year}"
-    fun getInvoiceNumber() = id
+    private fun getInvoiceNumber() = id
 
     fun print() = println(toString())
 
     // setters
-    fun setInvoiceName(_invoiceName: String) {
+    fun setCashierName(_cashierName: String) {
         dateModified = LocalDateTime.now()
-        invoiceName = _invoiceName
+        cashierName = _cashierName
     }
 
-    fun setLocation(_location: String) {
+    fun setCustomerName(_customerName: String) {
         dateModified = LocalDateTime.now()
-        location = _location
-    }
-
-    fun setMerchantName(_merchantName: String) {
-        dateModified = LocalDateTime.now()
-        cashierName = _merchantName
+        customerName = _customerName
     }
 
     fun setPaymentMethod(_paymentMethod: String) {
@@ -48,19 +43,22 @@ class Invoice (
 
     // other
     override fun toString(): String {
-        // header
-        Printer.addTextLn(invoiceName)
-        Printer.addTextLn("classes.Invoice ID: ${getInvoiceNumber()}")
-        Printer.addTextLn("Location: $location, ${getDateString()}")
+        // issuer
+        Printer.addText(issuer.toString())
+
+        // invoice
+        Printer.addTextLn("Invoice ID: ${getInvoiceNumber()}")
+        Printer.addTextLn("Date: ${getDateString(dateCreated)}")
         Printer.addLn()
 
+        // items
         Printer.addText(items.toString())
         Printer.addTextLn("To pay (EUR): ${roundToTwoDecimals(items.getTotalPrice())}")
         Printer.addLn()
 
-        // general information
+        // general
         Printer.addTextLn("Payment method: $paymentMethod")
-        Printer.addTextLn("Issued by: $issuerName")
+        Printer.addTextLn("Issued by: ${issuer.fullName}")
         Printer.addTextLn("Invoiced by: $cashierName")
         Printer.addLn()
 
