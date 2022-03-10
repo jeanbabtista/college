@@ -38,34 +38,37 @@ class Database
         try {
             $this->conn = new mysqli($this->host, $this->username, $this->password, $this->name);
             $this->conn->set_charset("UTF8");
-            $this->init();
+            // $this->init();
             return true;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
 
-    #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "\bool|mysqli_result"])]
-    public function query(string $query): array
+    /**
+     * @throws Exception
+     */
+    public function query(string $query): bool|mysqli_result
     {
+        if (!$this->conn)
+            throw new Exception('Error: database is not connected');
+
         $result = $this->conn->query($query);
 
         if ($this->conn->errno)
-            return getErrorObject(true, $this->conn->error);
-        return getErrorObject(false, 'Successfully executed query ' . $query, $result);
+            throw new Exception($this->conn->error);
+
+        return $result;
     }
 
     /**
      * @throws Exception
-     */
     public function init() {
         $this->tryCreateUserTable();
         $this->tryCreateAdsTable();
     }
 
-    /**
-     * @throws Exception
-     */
+    * @throws Exception
     public function tryCreateUserTable(): bool
     {
         list('error' => $error, 'message' => $message, 'data' => $data) = $this->query(
@@ -83,9 +86,7 @@ class Database
         return true;
     }
 
-    /**
-     * @throws Exception
-     */
+    * @throws Exception
     public function tryCreateAdsTable(): bool
     {
         list('error' => $error, 'message' => $message) = $this->query(
@@ -103,5 +104,5 @@ class Database
             throw new Exception($message);
 
         return true;
-    }
+    } */
 }

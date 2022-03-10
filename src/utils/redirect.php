@@ -10,6 +10,6 @@ function redirectToIndex() {
 
 #[NoReturn]
 function redirectToLogin() {
-    header("Location: /src/public/login.php");
+    header("Location: /src/public/auth/login.php");
     die();
 }

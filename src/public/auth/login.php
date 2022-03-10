@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/partials/header.php';
-require_once __DIR__ . '/../models/user.php';
-require_once __DIR__ . '/../utils/redirect.php';
+require_once __DIR__ . '/../partials/header.php';
+require_once __DIR__ . '/../../models/user.php';
+require_once __DIR__ . '/../../utils/redirect.php';
 
 function validate(): string {
     if (!isset($_POST['submit']))
@@ -34,7 +34,7 @@ function validate(): string {
         <div class="bg-white p-16 rounded shadow-2xl w-2/3">
             <h2 class="text-3xl font-bold mb-10 text-gray-800">Login</h2>
 
-            <form class="space-y-5" method="post" action="/src/public/login.php">
+            <form class="space-y-5" method="post" action="/src/public/auth/login.php">
                 <div>
                     <label for="username" class="block mb-1 font-bold text-gray-500">Username</label>
                     <input
@@ -64,4 +64,4 @@ function validate(): string {
         </div>
     </div>
 
-<?php include_once './partials/footer.php' ?>
+<?php require_once __DIR__ . '/../partials/footer.php' ?>

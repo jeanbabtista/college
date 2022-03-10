@@ -27,7 +27,7 @@ $user = getUserFromSession();
 <head>
     <title>Web Programming Exercise 1</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/src/public/styles/style.css" />
+    <!-- <link rel="stylesheet" href="/src/public/styles/style.css" /> -->
 </head>
 <body>
 <nav class="flex items-stretch bg-gray-900 h-16">
@@ -39,15 +39,15 @@ $user = getUserFromSession();
                class="text-gray-300 hover:bg-gray-700 hover:text-white ml-6 px-2 py-2 rounded-md font-medium">Home</a>
 
             <?php if (isset($_SESSION["USER_ID"])) { ?>
-                <a href="/src/public/publish.php"
+                <a href="/src/public/ad/publish.php"
                    class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Publish
                     new ad</a>
-                <a href="/src/public/logout.php"
+                <a href="/src/public/auth/logout.php"
                    class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Logout</a>
             <?php } else { ?>
-                <a href="/src/public/login.php"
+                <a href="/src/public/auth/login.php"
                    class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Login</a>
-                <a href="/src/public/register.php"
+                <a href="/src/public/auth/register.php"
                    class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Register</a>
             <?php } ?>
         </div>
