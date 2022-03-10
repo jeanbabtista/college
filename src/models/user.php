@@ -8,7 +8,7 @@ class User {
     /**
      * @throws Exception
      */
-    static function exists(string $username, Database $db): bool {
+    public static function exists(string $username, Database $db): bool {
         $conn = $db->getConnection();
 
         $data = $db->query(
@@ -23,13 +23,11 @@ class User {
     /**
      * @throws Exception
      */
-    static function register(string $username, string $password, Database $db): bool|mysqli_result
+    public static function register(string $username, string $password, Database $db): bool|mysqli_result
     {
         $conn = $db->getConnection();
         $username = $conn->real_escape_string($username);
         $password = sha1($password);
-
-        createDirectory(dirname(__DIR__) . "./public/images/$username");
 
         return $db->query(
             "INSERT INTO user (username, password) VALUES ('$username', '$password')"
@@ -39,7 +37,7 @@ class User {
     /**
      * @throws Exception
      */
-    static function login(string $username, string $password, Database $db): ?stdClass {
+    public static function login(string $username, string $password, Database $db): ?stdClass {
         $conn = $db->getConnection();
         $username = $conn->real_escape_string($username);
         $password = sha1($password);

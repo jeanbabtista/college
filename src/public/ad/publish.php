@@ -6,11 +6,6 @@ require_once __DIR__ . '/../../utils/redirect.php';
 
 global $user, $db;
 
-if (!$user) {
-    echo '<h1>You are not allowed to view this page.</h1>';
-    return;
-}
-
 function validate(): string {
     global $user;
 
@@ -29,16 +24,14 @@ function validate(): string {
         return 'Error: image cannot be empty';
 
     try {
-        Ad::create($title, $desc, 'image', $user->id, $db);
-        $id = $db->getConnection()->insert_id;
+        if (!$image['tmp_name'])
+            return 'Error: image not found';
 
-        $dirPath = __DIR__ . "/../images/$user->username/ad-$id/";
-        $imgPath = $dirPath . basename($image['name']);
+        $imageName = basename($image['name']);
+        $imageAbsolutePath = "{$_SERVER['DOCUMENT_ROOT']}/images/$user->username/$imageName";
+        move_uploaded_file($image['tmp_name'], $imageAbsolutePath);
 
-        createDirectory($dirPath);
-        move_uploaded_file($image['tmp_name'], $imgPath);
-
-        Ad::updateImage($id, $imgPath, $db);
+        Ad::create($title, $desc, $imageName, $user->id, $db);
 
         redirectToIndex();
     } catch (Exception $e) {
@@ -47,6 +40,10 @@ function validate(): string {
 }
 
 ?>
+
+<?php if (!$user) { ?>
+    <h1 class="font-medium leading-tight text-3xl mt-0 mb-2 text-white mb-10">You are not allowed to view this page.</h1>
+<?php return; } ?>
 
     <div class="auth flex items-center justify-center">
         <div class="bg-white p-16 rounded shadow-2xl w-2/3">

@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS ad (
      title text NOT NULL,
      description text NOT NULL,
      user_id int(11) NOT NULL,
-     image text NOT NULL,
+     image longblob NOT NULL,
      PRIMARY KEY (id)
 );
 

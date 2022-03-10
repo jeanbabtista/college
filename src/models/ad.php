@@ -7,8 +7,8 @@ class Ad {
     /**
      * @throws Exception
      */
-    static function getAll(Database $db): array {
-        $data = $db->query("SELECT * from ad");
+    public static function getAll(Database $db): array {
+        $data = $db->query("SELECT ad.*, user.username FROM ad JOIN user ON user.id = ad.user_id");
 
         $ads = [];
         while ($ad = $data->fetch_object())
@@ -20,41 +20,32 @@ class Ad {
     /**
      * @throws Exception
      */
-    static function find(string $id, Database $db): ?mysqli_result {
+    public static function getOneById(string $id, Database $db): ?stdClass
+    {
         $conn = $db->getConnection();
+        $id = $conn->real_escape_string($id);
 
-        return $db->query(
-            "SELECT ad.*, user.username FROM ad LEFT JOIN user ON user.id = ad.user_id WHERE ad.id = " .
-            $conn->real_escape_string($id)
+        $data = $db->query(
+            "SELECT ad.*, user.username FROM ad LEFT JOIN user ON user.id = ad.user_id WHERE ad.id = $id"
         );
+
+        if (!$data)
+            return null;
+        return $data->fetch_object();
     }
 
     /**
      * @throws Exception
      */
-    static function create(string $title, string $desc, string $image_url, string $user_id, Database $db): bool {
+    public static function create(string $title, string $desc, string $imagePath, string $user_id, Database $db): bool {
         $conn = $db->getConnection();
 
-        $db->query(
-            "INSERT INTO ad (title, description, image, user_id) VALUES('" .
-                        $conn->real_escape_string($title) . "', '" .
-                        $conn->real_escape_string($desc) . "', '" .
-                        $conn->real_escape_string($image_url) . "', '" .
-                        $conn->real_escape_string($user_id) . "')"
-        );
+        $title = $conn->real_escape_string($title);
+        $desc = $conn->real_escape_string($desc);
+        $image = $conn->real_escape_string($imagePath);
+        $user_id = $conn->real_escape_string($user_id);
 
-        return !$conn->errno;
-    }
-
-    /**
-     * @throws Exception
-     */
-    static function updateImage(string $id, string $image_url, Database $db): bool {
-        $conn = $db->getConnection();
-
-        $db->query(
-            "UPDATE ad SET image = '" . $conn->real_escape_string($image_url) . "' WHERE ad.id = $id"
-        );
+        $db->query("INSERT INTO ad (title, description, image, user_id) VALUES('$title', '$desc', '$image', '$user_id')");
 
         return !$conn->errno;
     }

@@ -25,33 +25,39 @@ $user = getUserFromSession();
 
 <html lang="eng">
 <head>
-    <title>Web Programming Exercise 1</title>
+    <title>Web Programming</title>
+    <link rel="stylesheet" href="/src/public/styles/style.css" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- <link rel="stylesheet" href="/src/public/styles/style.css" /> -->
 </head>
 <body>
-<nav class="flex items-stretch bg-gray-900 h-16">
-    <div class="flex items-stretch self-center justify-start">
-        <h1 class="text-white text-2xl px-2">Web Programming Exercise 1</h1>
+<nav class="flex bg-gray-900 h-16">
+    <div class="w-full flex justify-between self-center">
+        <div class="flex self-center">
+            <h1 class="text-white text-2xl px-2 pl-10">Local Ads</h1>
 
-        <div class="flex space-x-4 self-center">
-            <a href="/src/public/index.php"
-               class="text-gray-300 hover:bg-gray-700 hover:text-white ml-6 px-2 py-2 rounded-md font-medium">Home</a>
+            <div class="flex space-x-4 self-center">
+                <a href="/src/public/index.php"
+                   class="text-gray-300 hover:bg-gray-700 hover:text-white ml-6 px-2 py-2 rounded-md font-medium">Home</a>
 
-            <?php if (isset($_SESSION["USER_ID"])) { ?>
-                <a href="/src/public/ad/publish.php"
-                   class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Publish
-                    new ad</a>
-                <a href="/src/public/auth/logout.php"
-                   class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Logout</a>
-            <?php } else { ?>
-                <a href="/src/public/auth/login.php"
-                   class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Login</a>
-                <a href="/src/public/auth/register.php"
-                   class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Register</a>
-            <?php } ?>
+                <?php if ($user) { ?>
+                    <a href="/src/public/ad/publish.php"
+                       class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Publish
+                        new ad</a>
+                    <a href="/src/public/auth/logout.php"
+                       class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Logout</a>
+                <?php } else { ?>
+                    <a href="/src/public/auth/login.php"
+                       class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Login</a>
+                    <a href="/src/public/auth/register.php"
+                       class="text-gray-300 hover:bg-gray-700 hover:text-white px-2 py-2 rounded-md font-medium">Register</a>
+                <?php } ?>
+            </div>
         </div>
+
+        <?php if ($user) { ?>
+            <div class="text-white text-2xl pr-10"><?php echo $user->username ?></div>
+        <?php } ?>
     </div>
 </nav>
 
-<main class="mt-5">
+<main class="container mx-auto px-2 mt-5">

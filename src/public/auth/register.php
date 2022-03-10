@@ -24,6 +24,8 @@ function validate(): string {
             return 'Error: user already exists';
 
         User::register($username, $password, $db);
+        createDirectory("{$_SERVER['DOCUMENT_ROOT']}/images/$username");
+
         redirectToLogin();
     } catch (Exception $e) {
         return $e->getMessage();

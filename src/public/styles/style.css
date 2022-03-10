@@ -1,7 +1,12 @@
 body {
-    background-color: #25282c;
+    background-color: #25282c !important;
 }
 
 .auth {
     height: 90vh;
+}
+
+.ad-image {
+    max-height: 800px;
+    width: auto;
 }
