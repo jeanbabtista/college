@@ -1,9 +1,7 @@
 <?php
 
-use JetBrains\PhpStorm\ArrayShape;
-
 require_once __DIR__ . '/../../vendor/autoload.php';
-require_once __DIR__ . '/../utils/errorObject.php';
+require_once __DIR__ . '/../utils/responseObject.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -60,49 +58,4 @@ class Database
 
         return $result;
     }
-
-    /**
-     * @throws Exception
-    public function init() {
-        $this->tryCreateUserTable();
-        $this->tryCreateAdsTable();
-    }
-
-    * @throws Exception
-    public function tryCreateUserTable(): bool
-    {
-        list('error' => $error, 'message' => $message, 'data' => $data) = $this->query(
-            "CREATE TABLE IF NOT EXISTS user (
-                'id' INT NOT NULL AUTO_INCREMENT,
-                'username' VARCHAR(40) NOT NULL,
-                'password' VARCHAR(40) NOT NULL,
-                PRIMARY KEY ('id')
-            )"
-        );
-
-        if ($error)
-            throw new Exception($message);
-
-        return true;
-    }
-
-    * @throws Exception
-    public function tryCreateAdsTable(): bool
-    {
-        list('error' => $error, 'message' => $message) = $this->query(
-            "CREATE TABLE IF NOT EXISTS ad (
-                'id' INT NOT NULL AUTO_INCREMENT,
-                'title' VARCHAR(40) NOT NULL,
-                'description' text NOT NULL,
-                'user_id' INT NOT NULL,
-                'image' longblob NOT NULL,
-                PRIMARY KEY ('id')
-            )"
-        );
-
-        if ($error)
-            throw new Exception($message);
-
-        return true;
-    } */
 }

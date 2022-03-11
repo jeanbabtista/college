@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../public/partials/header.php';
-require_once __DIR__ . '/../utils/errorObject.php';
+require_once __DIR__ . '/../utils/responseObject.php';
 
 class Ad {
     /**
