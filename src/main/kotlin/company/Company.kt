@@ -1,12 +1,11 @@
 package company
 
 import lib.Printer
-import lib.getDateString
 import java.time.LocalDateTime
 
 class Company(
-    private val name: String,
-    val fullName: String,
+    name: String,
+    fullName: String,
     private val isTaxpayer: Boolean,
     private val taxNumber: String,
     private val registrationNumber: String,
@@ -14,6 +13,10 @@ class Company(
     private val numberOfEmployees: Int,
     private val description: String,
 ) {
+    var name = name
+        private set
+    var fullName = fullName
+        private set
     private val dateSignIn = LocalDateTime.now()
 
     override fun toString(): String {

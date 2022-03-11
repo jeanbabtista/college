@@ -14,10 +14,12 @@ class Items {
     // getters
     fun getAll() = items
 
+    fun getByIndex(index: Int) = items[index]
+
     // CRUD functions
     fun getTotalPrice(): Double {
         var sum = 0.0
-        items.forEach{ item -> sum += item.getTotalPrice() }
+        items.forEach{ item -> sum += item.totalPrice }
         return sum
     }
 
@@ -29,7 +31,14 @@ class Items {
 
     private fun find(id: UUID) = items.find { item -> item.id === id }
 
-    fun updatePricePerPiece(id: UUID, pricePerPiece: Double): Boolean {
+    fun update(
+        id: UUID,
+        name: String = "",
+        pricePerPiece: Double = 0.0,
+        quantity: Int = 0,
+        discount: Double = 0.0,
+        taxRate: Double = 0.0
+    ): Boolean {
         dateModified = LocalDateTime.now()
 
         val found = find(id)
@@ -38,7 +47,23 @@ class Items {
             return false
         }
 
-        items[items.indexOf(found)].setPricePerPiece(pricePerPiece)
+        val item = items[items.indexOf(found)]
+
+        if (name !== "")
+            item.name = name
+
+        if (pricePerPiece != 0.0)
+            item.pricePerPiece = pricePerPiece
+
+        if (quantity != 0)
+            item.quantity = quantity
+
+        if (discount != 0.0)
+            item.discount = discount
+
+        if (taxRate != 0.0)
+            item.taxRate = taxRate
+
         return true
     }
 

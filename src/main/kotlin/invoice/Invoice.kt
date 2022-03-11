@@ -10,18 +10,28 @@ import java.util.*
 class Invoice (
     private var items: Items,
     private var issuer: Company,
-    private var customerName: String,
+    private var customer: Company,
     private var cashierName: String,
     private var paymentMethod: String = "cash"
 ) {
     // values
-    private val id = UUID.randomUUID().toString()
+    private val id: UUID = UUID.randomUUID()
+    private val invoiceNumber = "${issuer.name.replace(" ","").uppercase().substring(0, 5)}-$counter"
     private val barcode = "(01)00614141987658"
     private val dateCreated = LocalDateTime.now()
     private var dateModified = LocalDateTime.now()
 
+    companion object {
+        var counter: Int = 0
+        fun counter(): Int = counter
+    }
+
+    init {
+        counter++
+    }
+
     // getters
-    private fun getInvoiceNumber() = id
+    private fun getInvoiceNumber() = invoiceNumber
 
     fun print() = println(toString())
 
@@ -31,9 +41,9 @@ class Invoice (
         cashierName = _cashierName
     }
 
-    fun setCustomerName(_customerName: String) {
+    fun setCostumer(_customer: Company) {
         dateModified = LocalDateTime.now()
-        customerName = _customerName
+        customer = _customer
     }
 
     fun setPaymentMethod(_paymentMethod: String) {
