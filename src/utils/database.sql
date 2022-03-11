@@ -22,22 +22,36 @@ CREATE TABLE IF NOT EXISTS ad (
      id int(11) NOT NULL AUTO_INCREMENT,
      title text NOT NULL,
      description text NOT NULL,
-     date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-     image longblob NOT NULL,
+     date_start timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     date_end timestamp NOT NULL,
      views int(11) NOT NULL DEFAULT 0,
      user_id int(11) NOT NULL,
+     front_image_id int(11) NOT NULL,
      ad_categories_id int(11) NOT NULL,
+     ad_images_id int(11) NOT NULL,
      PRIMARY KEY (id),
      FOREIGN KEY (user_id)
          REFERENCES user(id),
+     FOREIGN KEY (front_image_id)
+         REFERENCES image(id),
      FOREIGN KEY (ad_categories_id)
-         REFERENCES ad_categories(id)
+         REFERENCES ad_categories(id),
+     FOREIGN KEY (ad_images_id)
+         REFERENCES ad_images(id)
+);
+
+DROP TABLE IF EXISTS image;
+CREATE TABLE IF NOT EXISTS image (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    path text NOT NULL,
+    PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS category;
 CREATE TABLE IF NOT EXISTS category (
     id int(11) NOT NULL AUTO_INCREMENT,
     title text NOT NULL,
+    parent_id int(11) NOT NULL DEFAULT 0,
     PRIMARY KEY (id)
 );
 
@@ -56,10 +70,12 @@ CREATE TABLE IF NOT EXISTS ad_categories (
 DROP TABLE IF EXISTS ad_images;
 CREATE TABLE IF NOT EXISTS ad_images (
    id int(11) NOT NULL AUTO_INCREMENT,
-   path text NOT NULL,
    ad_id int(11) NOT NULL,
+   image_id text NOT NULL,
    PRIMARY KEY (id),
    FOREIGN KEY (ad_id)
-        REFERENCES ad(id)
+        REFERENCES ad(id),
+   FOREIGN KEY (image_id)
+       REFERENCES image(id)
 );
 
