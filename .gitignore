@@ -1,0 +1,6 @@
+.idea/
+libs/
+out/
+test/
+resources/
+*.iml
