@@ -1,6 +1,10 @@
 # CREATE DATABASE IF NOT EXISTS 'sp-vaja-1' DEFAULT CHARACTER SET utf8 COLLATE utf8_slovenian_ci;
 # USE 'sp-vaja-1';
 
+DROP TABLE IF EXISTS ad_categories;
+DROP TABLE IF EXISTS ad_images;
+DROP TABLE IF EXISTS ad;
+
 DROP TABLE IF EXISTS user;
 CREATE TABLE IF NOT EXISTS user (
     id int(11) NOT NULL AUTO_INCREMENT,
@@ -26,18 +30,16 @@ CREATE TABLE IF NOT EXISTS ad (
      date_end timestamp NOT NULL,
      views int(11) NOT NULL DEFAULT 0,
      user_id int(11) NOT NULL,
-     front_image_id int(11) NOT NULL,
-     ad_categories_id int(11) NOT NULL,
-     ad_images_id int(11) NOT NULL,
+     front_image_id int(11) NULL,
      PRIMARY KEY (id),
      FOREIGN KEY (user_id)
-         REFERENCES user(id),
+         REFERENCES user(id)
+         ON DELETE CASCADE
+         ON UPDATE CASCADE,
      FOREIGN KEY (front_image_id)
-         REFERENCES image(id),
-     FOREIGN KEY (ad_categories_id)
-         REFERENCES ad_categories(id),
-     FOREIGN KEY (ad_images_id)
-         REFERENCES ad_images(id)
+         REFERENCES image(id)
+         ON DELETE CASCADE
+         ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS image;
@@ -51,7 +53,7 @@ DROP TABLE IF EXISTS category;
 CREATE TABLE IF NOT EXISTS category (
     id int(11) NOT NULL AUTO_INCREMENT,
     title text NOT NULL,
-    parent_id int(11) NOT NULL DEFAULT 0,
+    parent_id int(11),
     PRIMARY KEY (id)
 );
 
@@ -62,20 +64,28 @@ CREATE TABLE IF NOT EXISTS ad_categories (
     category_id int(11) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (ad_id)
-        REFERENCES ad(id),
+        REFERENCES ad(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (category_id)
         REFERENCES category(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS ad_images;
 CREATE TABLE IF NOT EXISTS ad_images (
    id int(11) NOT NULL AUTO_INCREMENT,
    ad_id int(11) NOT NULL,
-   image_id text NOT NULL,
+   image_id int(11) NOT NULL,
    PRIMARY KEY (id),
    FOREIGN KEY (ad_id)
-        REFERENCES ad(id),
+        REFERENCES ad(id)
+       ON DELETE CASCADE
+       ON UPDATE CASCADE,
    FOREIGN KEY (image_id)
        REFERENCES image(id)
+       ON DELETE CASCADE
+       ON UPDATE CASCADE
 );
 

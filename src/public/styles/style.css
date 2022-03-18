@@ -2,6 +2,10 @@ body {
     background-color: #25282c !important;
 }
 
+/*.vh90 {
+    height: 90vh;
+}*/
+
 .auth {
     height: 90vh;
 }

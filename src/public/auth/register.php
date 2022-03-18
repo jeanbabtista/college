@@ -30,22 +30,22 @@ function validate(): array
     ) = $_POST;
 
     if (!$username)
-        return getResponse(true, 'Error: username cannot be empty');
+        return getResponse(true, 'Username cannot be empty');
     if (!$email)
-        return getResponse(true, 'Error: email cannot be empty');
+        return getResponse(true, 'Email cannot be empty');
     if (!$fname)
-        return getResponse(true, 'Error: first name cannot be empty');
+        return getResponse(true, 'First name cannot be empty');
     if (!$lname)
-        return getResponse(true, 'Error: last name cannot be empty');
+        return getResponse(true, 'Last name cannot be empty');
     if (!$password)
-        return getResponse(true, 'Error: password cannot be empty');
+        return getResponse(true, 'Password cannot be empty');
     if ($password !== $repeat)
-        return getResponse(true, 'Error: passwords do not match');
+        return getResponse(true, 'Passwords do not match');
 
     // check if user exists
     try {
         if (User::exists($username, $db))
-            return getResponse(true, 'Error: user already exists');
+            return getResponse(true, 'User already exists');
 
         User::register($username, $email, $fname, $lname, $password, $address, $phone, $post, $sex, intval($age), $db);
         createDirectory("{$_SERVER['DOCUMENT_ROOT']}/images/$username");

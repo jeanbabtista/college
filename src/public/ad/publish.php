@@ -1,90 +1,166 @@
 <?php
+
+use JetBrains\PhpStorm\ArrayShape;
+
 require_once __DIR__ . '/../partials/header.php';
 require_once __DIR__ . '/../../models/ad.php';
+require_once __DIR__ . '/../../models/category.php';
+require_once __DIR__ . '/../../models/image.php';
 require_once __DIR__ . '/../../utils/files.php';
 require_once __DIR__ . '/../../utils/redirect.php';
+require_once __DIR__ . '/../../utils/responseObject.php';
+require_once __DIR__ . '/../../utils/toast.php';
 
 global $user, $db;
 
-function validate(): string {
+$categories = [];
+$images = [];
+
+try {
+    $categories = Category::findAll($db);
+} catch (Exception $e) {
+    echo $e->getMessage();
+}
+
+#[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "\bool|mysqli_result"])]
+function validate(): array {
     global $user;
 
     if (!isset($_POST['submit']))
-        return '';
+        return getResponse(false, '');
 
     global $db;
-    list('title' => $title, 'description' => $desc) = $_POST;
-    $image = $_FILES['image'];
+    list(
+        'title' => $title,
+        'description' => $description,
+        'categories' => $categories
+    ) = $_POST;
 
     if (!$title)
-        return 'Error: title cannot be empty';
-    if (!$desc)
-        return 'Error: description cannot be empty';
-    if (!$image)
-        return 'Error: image cannot be empty';
+        return getResponse(true, 'Title cannot be empty');
+    if (!$description)
+        return getResponse(true, 'Description cannot be empty');
+
+    $images = $_FILES['images'];
+    if (count($images['name']) == 1 && !$images['name'][0])
+        return getResponse(true, 'Image cannot be empty');
 
     try {
-        if (!$image['tmp_name'])
-            return 'Error: image not found';
+        // front image
+        $imagesNames = $images['name'];
 
-        $imageName = basename($image['name']);
-        $imageAbsolutePath = "{$_SERVER['DOCUMENT_ROOT']}/images/$user->username/$imageName";
-        move_uploaded_file($image['tmp_name'], $imageAbsolutePath);
+        foreach ($imagesNames as $i => $imageName) {
+            $imageName = basename($imageName);
+            $imagesNames[$i] = $imageName;
+            $imageAbsolutePath = "{$_SERVER['DOCUMENT_ROOT']}/images/$user->username/$imageName";
+            move_uploaded_file($images['tmp_name'][$i], $imageAbsolutePath);
+        }
 
-        Ad::create($title, $desc, $imageName, $user->id, $db);
-
+        Ad::save($title, $description, $user->id, $imagesNames, $categories, $db);
         redirectToIndex();
     } catch (Exception $e) {
-        return $e->getMessage();
+        return getResponse(true, $e->getMessage());
     }
 }
 
 ?>
 
+<?php echo toast('validate') ?>
+
 <?php if (!$user) { ?>
     <h1 class="font-medium leading-tight text-3xl mt-0 mb-2 text-white mb-10">You are not allowed to view this page.</h1>
 <?php return; } ?>
 
-    <div class="auth flex items-center justify-center">
-        <div class="bg-white p-16 rounded shadow-2xl w-2/3">
-            <h2 class="text-3xl font-bold mb-10 text-gray-800">Publish ad</h2>
+    <div class="flex justify-center">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <img class="mx-auto h-12 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
+                     alt="Workflow">
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-200">
+                    Publish ad
+                </h2>
+            </div>
 
-            <form class="space-y-5" method="post" action="/src/public/ad/publish.php" enctype="multipart/form-data">
-                <div>
-                    <label for="title" class="block mb-1 font-bold text-gray-500">Title</label>
+            <form class="space-y-4" method="post" action="/src/public/ad/publish.php" enctype="multipart/form-data">
+                <div class="mb-6">
+                    <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                        Title *
+                    </label>
                     <input
-                            id="title"
-                            type="text"
-                            name="title"
-                            class="w-full border-2 border-gray-200 p-3 rounded outline-none focus:border-purple-500"
-                    />
+                        id="title"
+                        type="text"
+                        name="title"
+                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500
+                            focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+                        required
                 </div>
-                <div>
-                    <label for="description" class="block mb-1 font-bold text-gray-500">Description</label>
-                    <input
-                            id="description"
-                            type="text"
-                            name="description"
-                            class="w-full border-2 border-gray-200 p-3 rounded outline-none focus:border-purple-500"
-                    />
+
+                <div class="mb-6 mt-6">
+                    <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                        Description *
+                    </label>
+                    <textarea id="description"
+                              name="description"
+                              rows="4"
+                              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300
+                                focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600
+                                dark:placeholder-white dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                              required
+                    ></textarea>
                 </div>
-                <div>
-                    <label for="image" class="block mb-1 font-bold text-gray-500">Image</label>
-                    <input
-                            id="image"
+
+                <div class="grid xl:grid-cols-2 xl:gap-6">
+                    <div class="mb-6 z-0 w-full group">
+                        <label for="images[]" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                            Select image * (at least one)
+                        </label>
+                        <input
+                            id="images[]"
                             type="file"
-                            name="image"
-                            class="w-full border-2 border-gray-200 p-3 rounded outline-none focus:border-purple-500"
-                    />
+                            name="images[]"
+                            class="block w-full text-sm text-slate-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-violet-50 file:text-violet-700
+                                hover:file:bg-violet-100"
+                            multiple
+                        />
+                    </div>
+
+                    <div class="mb-6 z-0 w-full group">
+                        <label for="categories[]" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                            Select category * (at least one)
+                        </label>
+                        <select
+                            id="categories[]"
+                            name="categories[]"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500
+                                focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            multiple>
+                            <?php foreach ($categories as $category) { ?>
+                                <option
+                                        value="<?php echo $category->id ?>"
+                                    <?php echo $category->id == 1 ? "selected" : "" ?>>
+                                    <?php echo $category->title ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
                 </div>
 
-                <button id="submit" name="submit" class="block w-full bg-yellow-400 hover:bg-yellow-300 p-4 rounded
-                    text-yellow-900 hover:text-yellow-800 transition duration-300">
-                    Publish
-                </button>
+                <div class="mt-8 flex justify-center">
+                    <button
+                        type="submit"
+                        name="submit"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg
+                            text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Publish
+                    </button>
+                </div>
             </form>
-
-            <p><?php echo validate() ?></p>
         </div>
     </div>
 

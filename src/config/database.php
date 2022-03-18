@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpIllegalPsrClassPathInspection */
+
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../utils/responseObject.php';
 
@@ -14,8 +16,7 @@ class Database
     private string $password;
     protected ?mysqli $conn;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->host = $_ENV['DB_HOST'];
         $this->name = $_ENV['DB_NAME'];
         $this->username = $_ENV['DB_USER'];
@@ -23,20 +24,17 @@ class Database
         $this->conn = null;
     }
 
-    public function getConnection(): ?mysqli
-    {
+    public function getConnection(): ?mysqli {
         return $this->conn;
     }
 
     /**
      * @throws Exception
      */
-    public function connect(): bool
-    {
+    public function connect(): bool {
         try {
             $this->conn = new mysqli($this->host, $this->username, $this->password, $this->name);
             $this->conn->set_charset("UTF8");
-            // $this->init();
             return true;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
@@ -46,8 +44,7 @@ class Database
     /**
      * @throws Exception
      */
-    public function query(string $query): bool|mysqli_result
-    {
+    public function query(string $query): bool|mysqli_result {
         if (!$this->conn)
             throw new Exception('Error: database is not connected');
 
