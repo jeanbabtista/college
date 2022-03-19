@@ -13,10 +13,24 @@ class Company(
     private val numberOfEmployees: Int,
     private val description: String,
 ) {
+    init {
+        try {
+            if (name == "")
+                throw Exception("[ Company.kt ] Item for '$name' name cannot be empty")
+
+            if (fullName == "")
+                throw Exception("[ Company.kt ] Full for '$name' name cannot be empty")
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
     var name = name
         private set
+
     var fullName = fullName
         private set
+
     private val dateSignIn = LocalDateTime.now()
 
     override fun toString(): String {

@@ -1,6 +1,8 @@
 package invoice
 
 import company.Company
+import enums.Payment
+import lib.BarcodeUtil
 import lib.Printer
 import lib.getDateString
 import lib.roundToTwoDecimals
@@ -8,48 +10,55 @@ import java.time.LocalDateTime
 import java.util.*
 
 class Invoice (
+    private val barcode: String,
     private var items: Items,
     private var issuer: Company,
-    private var customer: Company,
-    private var cashierName: String,
-    private var paymentMethod: String = "cash"
+    cashierName: String,
+    customer: Company? = null,
+    paymentMethod: Payment = Payment.CASH
 ) {
-    // values
-    private val id: UUID = UUID.randomUUID()
-    private val invoiceNumber = "${issuer.name.replace(" ","").uppercase().substring(0, 5)}-$counter"
-    private val barcode = "(01)00614141987658"
-    private val dateCreated = LocalDateTime.now()
-    private var dateModified = LocalDateTime.now()
+    init {
+        counter++
+
+        try {
+            BarcodeUtil.isBarcodeValid(barcode)
+
+            if (cashierName == "")
+                throw Exception("[ Invoice.kt ] Cashier name cannot be empty")
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
     companion object {
         var counter: Int = 0
         fun counter(): Int = counter
     }
 
-    init {
-        counter++
-    }
-
-    // getters
-    private fun getInvoiceNumber() = invoiceNumber
+    private val id: UUID = UUID.randomUUID()
+    private val invoiceNumber = "${issuer.name.replace(" ","").uppercase().substring(0, 5)}-$counter"
+    private val dateCreated = LocalDateTime.now()
+    private var dateModified = LocalDateTime.now()
 
     fun print() = println(toString())
 
-    // setters
-    fun setCashierName(_cashierName: String) {
-        dateModified = LocalDateTime.now()
-        cashierName = _cashierName
-    }
+    private var cashierName = cashierName
+        set(value) {
+            dateModified = LocalDateTime.now()
+            field = value
+        }
 
-    fun setCostumer(_customer: Company) {
-        dateModified = LocalDateTime.now()
-        customer = _customer
-    }
+    var customer = customer
+        set(value) {
+            dateModified = LocalDateTime.now()
+            field = value
+        }
 
-    fun setPaymentMethod(_paymentMethod: String) {
-        dateModified = LocalDateTime.now()
-        paymentMethod = _paymentMethod
-    }
+    private var paymentMethod = paymentMethod
+        set(value) {
+            dateModified = LocalDateTime.now()
+            field = value
+        }
 
     // other
     override fun toString(): String {
@@ -57,17 +66,17 @@ class Invoice (
         Printer.addText(issuer.toString())
 
         // invoice
-        Printer.addTextLn("Invoice ID: ${getInvoiceNumber()}")
+        Printer.addTextLn("Invoice ID: $invoiceNumber")
         Printer.addTextLn("Date: ${getDateString(dateCreated)}")
         Printer.addLn()
 
         // items
         Printer.addText(items.toString())
-        Printer.addTextLn("To pay (EUR): ${roundToTwoDecimals(items.getTotalPrice())}")
+        Printer.addTextLn("To pay (EUR): ${roundToTwoDecimals(items.totalPrice)}")
         Printer.addLn()
 
         // general
-        Printer.addTextLn("Payment method: $paymentMethod")
+        Printer.addTextLn("Payment method: ${Payment.get(paymentMethod)}")
         Printer.addTextLn("Issued by: ${issuer.fullName}")
         Printer.addTextLn("Invoiced by: $cashierName")
         Printer.addLn()

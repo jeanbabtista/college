@@ -1,0 +1,144 @@
+0 USA and Canada
+1 USA
+30 France and Monaco
+31 France and Monaco
+32 France and Monaco
+33 France and Monaco
+34 France and Monaco
+35 France and Monaco
+36 France and Monaco
+37 France and Monaco
+380 Bulgaria
+383 Slovenia
+385 Croatia
+387 Bosnia and Herzegovina
+389 Montenegro
+40 Germany
+41 Germany
+42 Germany
+43 Germany
+44 Germany
+45 Japan
+46 Russia
+470 Kyrgyzstan
+471 Taiwan
+474 Estonia
+475 Latvia
+476 Azerbaijan
+477 Lithuania
+478 Uzbekistan
+479 Sri Lanka
+480 Philippines
+481 Belarus
+482 Ukraine
+483 Turkmenistan
+484 Moldova
+485 Armenia
+486 Georgia
+487 Kazakhstan
+488 Tajikistan
+489 Hong Kong
+49 Japan
+50 United Kingdom
+520 Greece
+521 Greece
+528 Lebanon
+529 Cyprus
+530 Albania
+531 North Macedonia
+535 Malta
+539 Ireland
+54 Belgium and Luxembourg
+560 Portugal
+569 Iceland
+57 Denmark
+590 Poland
+594 Romania
+599 Hungary
+600 South Africa
+601 South Africa
+603 Ghana
+604 Senegal
+608 Bahrain
+609 Mauritius
+611 Morocco
+613 Algeria
+615 Nigeria
+616 Kenya
+618 Côte d'Ivoire
+619 Tunisia
+620 Tanzania
+621 Syria
+622 Egypt
+623 Brunei
+624 Libya
+625 Jordan
+626 Iran
+627 Kuwait
+628 Saudi Arabia
+629 United Arab Emirates
+630 Qatar
+64 Finland
+69 China
+70 Norway
+729 Israel
+73 Sweden
+740 Guatemala
+741 El Salvador
+742 Honduras
+743 Nicaragua
+744 Costa Rica
+745 Panama
+746 Dominican Republic
+750 Mexico
+754 Canada
+755 Canada
+759 Venezuela
+76 Switzerland and Liechtenstein
+770 Colombia
+771 Colombia
+773 Uruguay
+775 Peru
+777 Bolivia
+778 Argentina
+779 Argentina
+780 Chile
+784 Paraguay
+786 Ecuador
+789 Brazil
+790 Brazil
+80 Italy
+81 Italy
+82 Italy
+83 Italy, San Marino and Vatican City
+84 Spain, Andorra
+850 Cuba
+858 Slovakia
+859 Czech Republic
+860 Serbia
+865 Mongolia
+867 North Korea
+868 Turkey
+869 Turkey
+87 Netherlands
+880 South Korea
+883 Myanmar
+884 Cambodia
+885 Thailand
+888 Singapore
+890 India
+893 Vietnam
+894 Bangladesh
+896 Pakistan
+899 Indonesia
+90 Austria
+91 Austria
+93 Australia
+94 New Zealand
+955 Malaysia
+958 Macau
+96 GS1 Global Office: GTIN-8 allocations
+977 Serial publications
+978 Bookland
+979 Bookland
+980 Refund receipts
