@@ -1,9 +1,7 @@
 <?php
 
-use JetBrains\PhpStorm\NoReturn;
-
 function redirectToIndex(): never {
-    header("Location: /src/public");
+    header("Location: /src/public/index.php");
     die();
 }
 

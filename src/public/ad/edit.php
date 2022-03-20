@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../utils/files.php';
 require_once __DIR__ . '/../../utils/redirect.php';
 require_once __DIR__ . '/../../utils/responseObject.php';
 require_once __DIR__ . '/../../utils/toast.php';
+require_once __DIR__ . '/../../utils/error.php';
 
 global $user, $db;
 
@@ -22,10 +23,14 @@ try {
     if (isset($_GET['id']))
         $adId = $_GET['id'];
 
+    if (!isset($_GET['id']) || !$adId)
+        throw new Exception('Error: ad id not present');
+
     $ad = Ad::findOneById($adId, $db)['ad'];
     $categories = Category::findAll($db);
-} catch (Exception $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    handleThrowable($e);
+    return;
 }
 
 #[ArrayShape(['error' => "bool", 'message' => "string", 'data' => "\bool|mysqli_result"])]
@@ -49,27 +54,27 @@ function validate(): array {
         global $adId;
 
         Ad::updateOneById($adId, $title, $description, $dateEnd, $db);
-        redirectToIndex();
+
+        // redirectToIndex();
+        return getResponse(false, 'Successfully updated ad');
     } catch (Exception $e) {
         return getResponse(true, $e->getMessage());
     }
 }
 
-?>
-
-<?php echo toast('validate') ?>
+echo toast('validate') ?>
 
 <?php if (!$user) { ?>
     <h1 class="font-medium leading-tight text-3xl mt-0 mb-2 text-white mb-10">You are not allowed to view this page.</h1>
-<?php return; } ?>
+<?php require_once __DIR__ . '/../partials/footer.php'; return; } ?>
 
 <?php if (!$ad) { ?>
     <h1 class="font-medium leading-tight text-3xl mt-0 mb-2 text-white mb-10">Add does not exist.</h1>
-<?php return; } ?>
+<?php require_once __DIR__ . '/../partials/footer.php'; return; } ?>
 
 <?php if ($ad['userId'] != $user->id) { ?>
     <h1 class="font-medium leading-tight text-3xl mt-0 mb-2 text-white mb-10">You are not allowed to edit this ad.</h1>
-<?php return; } ?>
+<?php require_once __DIR__ . '/../partials/footer.php'; return; } ?>
 
 <div class="flex justify-center">
     <div class="max-w-md w-full space-y-8">
@@ -144,4 +149,4 @@ function validate(): array {
     </div>
 </div>
 
-<?php include_once __DIR__ . '/../partials/footer.php' ?>
+<?php include_once __DIR__ . '/../partials/footer.php';

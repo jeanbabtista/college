@@ -1,5 +1,5 @@
-# CREATE DATABASE IF NOT EXISTS 'sp-vaja-1' DEFAULT CHARACTER SET utf8 COLLATE utf8_slovenian_ci;
-# USE 'sp-vaja-1';
+CREATE DATABASE IF NOT EXISTS `sp-vaja-1` DEFAULT CHARACTER SET utf8 COLLATE utf8_slovenian_ci;
+USE `sp-vaja-1`;
 
 DROP TABLE IF EXISTS ad_categories;
 DROP TABLE IF EXISTS ad_images;
@@ -56,6 +56,11 @@ CREATE TABLE IF NOT EXISTS category (
     parent_id int(11),
     PRIMARY KEY (id)
 );
+
+INSERT INTO category (title, parent_id) VALUES
+('beauty', null),
+('gaming', null),
+('make up', 1);
 
 DROP TABLE IF EXISTS ad_categories;
 CREATE TABLE IF NOT EXISTS ad_categories (

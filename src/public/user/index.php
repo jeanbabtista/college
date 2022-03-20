@@ -6,6 +6,7 @@ use JetBrains\PhpStorm\Pure;
 require_once __DIR__ . '/../partials/header.php';
 require_once __DIR__ . '/../../models/user.php';
 require_once __DIR__ . '/../../models/category.php';
+require_once __DIR__ . '/../../utils/error.php';
 require_once __DIR__ . '/../../utils/toast.php';
 require_once __DIR__ . '/../../utils/responseObject.php';
 
@@ -26,6 +27,9 @@ $category = null;
 $isOutOfDate = false;
 
 try {
+    if (!isset($_GET['id']))
+        throw new Exception('Error: user id not present');
+
     $id = $_GET['id'];
     $categories = Category::findAll($db);
     $fetchedUser = User::findOneById($id, $db);
@@ -58,19 +62,18 @@ try {
     }
     else
         $userAds = User::findAllAds($id, $isOutOfDate, $db);
-} catch (Exception $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    handleThrowable($e);
+    return;
 }
 
-?>
-
-<?php echo toast('validate') ?>
+echo toast('validate') ?>
 
 <?php if (!$fetchedUser) { ?>
     <h1 class="font-medium leading-tight text-3xl mt-0 mb-2 text-white mb-10">
         User with id <?php echo $_GET['id'] ?> does not exist.
     </h1>
-<?php return; } ?>
+<?php require_once __DIR__ . '/../partials/footer.php'; return; } ?>
 
 <h1 class="font-medium text-3xl mt-0 mb-2 text-white mb-10"><?php echo strtoupper($title) ?></h1>
 
@@ -162,4 +165,4 @@ dark:hover:bg-blue-700 dark:focus:ring-blue-800 mb-8" type="button">
     <?php } ?>
 </div>
 
-<?php require_once __DIR__ . '/../partials/footer.php' ?>
+<?php require_once __DIR__ . '/../partials/footer.php';

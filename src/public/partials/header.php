@@ -2,26 +2,22 @@
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/session.php';
+require_once __DIR__ . '/../../utils/error.php';
 
 // connect to database
 $db = new Database();
 
 try {
     $db->connect();
-} catch (Exception $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    handleThrowable($e);
+    return;
 }
 
 // initialize session
 session_start();
-if (isset($_SESSION['LAST_ACTIVITY']) && time() - $_SESSION['LAST_ACTIVITY'] < 1800)
-    session_regenerate_id(true);
-$_SESSION['LAST_ACTIVITY'] = time();
-
-// get user from session (if exists)
-$user = getUserFromSession();
-
-?>
+setSession();
+$user = getUserFromSession() ?>
 
 <html lang="eng">
 <head>

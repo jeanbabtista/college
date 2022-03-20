@@ -56,9 +56,7 @@ function validate(): array
     }
 }
 
-?>
-
-<?php echo toast('validate') ?>
+echo toast('validate') ?>
 
 <div class="flex justify-center">
     <div class="max-w-md w-full space-y-8">
@@ -147,4 +145,4 @@ function validate(): array
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../partials/footer.php' ?>
+<?php require_once __DIR__ . '/../partials/footer.php';

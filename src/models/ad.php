@@ -4,9 +4,10 @@
 
 use JetBrains\PhpStorm\ArrayShape;
 
-require_once __DIR__ . '/../utils/responseObject.php';
 require_once __DIR__ . '/../models/image.php';
+require_once __DIR__ . '/../utils/responseObject.php';
 require_once __DIR__ .'/../utils/toast.php';
+require_once __DIR__ .'/../utils/files.php';
 
 class Ad {
     /**
@@ -183,13 +184,6 @@ class Ad {
     /**
      * @throws Exception
      */
-    public static function delete(string $id, Database $db) {
-        $db->query("DELETE FROM ad WHERE id = $id");
-    }
-
-    /**
-     * @throws Exception
-     */
     public static function incrementViews(string $id, Database $db) {
         $db->query("UPDATE ad SET views = views + 1 WHERE id = $id");
     }
@@ -302,5 +296,45 @@ class Ad {
             $ads[] = $ad;
 
         return $ads;
+    }
+
+    public static function deleteOneById(mixed $adId, Database $db): bool {
+        $conn = $db->getConnection();
+
+        // check if ad exists
+        $ad = $conn->query("SELECT id FROM ad WHERE id = $adId");
+        if (!$ad->fetch_object())
+            return false;
+
+        $user = $conn->query(
+            "SELECT u.username FROM ad a JOIN user u ON a.user_id = u.id LIMIT 1"
+        )->fetch_object();
+
+        // get images for ad
+        $data = $conn->query("SELECT ai.image_id as id, i.path
+            FROM ad_images ai
+            JOIN image i ON ai.image_id = i.id
+            WHERE ai.ad_id = $adId"
+        );
+
+        $imagesIds = [];
+        $imagesPaths = [];
+        while ($image = $data->fetch_object()) {
+            $imagesIds[] = $image->id;
+            $imagesPaths[] = $image->path;
+        }
+
+        // delete images from `image` table
+        foreach ($imagesIds as $imageId)
+            $conn->query("DELETE FROM image WHERE id = $imageId");
+
+        // delete images from server directories
+        foreach ($imagesPaths as $imagePath)
+            deleteImage("{$_SERVER['DOCUMENT_ROOT']}/images/$user->username/$imagePath");
+
+        // delete ad
+        $conn->query("DELETE FROM ad WHERE id = $adId");
+
+        return true;
     }
 }

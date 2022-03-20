@@ -12,3 +12,8 @@ function createDirectory(string $path) {
     if (!$status)
         throw new Exception('Error: could not create directory');
 }
+
+function deleteImage(string $path) {
+    if (file_exists($path))
+        unlink($path);
+}
