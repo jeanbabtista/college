@@ -18,6 +18,35 @@ class Items: LinkedHashMap<UUID, Item>() {
             return sum
         }
 
+    override fun put(key: UUID, value: Item): Item? {
+        dateModified = LocalDateTime.now()
+
+        // first entry
+        if (!super.containsKey(key))
+            return super.put(key, value)
+
+        // next entries
+        val item = super.get(key)
+        item!!.quantity += value.quantity
+
+        return item
+    }
+
+    override fun remove(key: UUID): Item? {
+        dateModified = LocalDateTime.now()
+
+        if (!super.containsKey(key))
+            return null
+
+        val item = super.get(key)
+
+        if (item!!.quantity < 1)
+            throw java.lang.IllegalStateException("[ Items.kt ] Error deleting item ('${item.name}') - item does not contain enough quantity to be deleted")
+
+        item.quantity -= 1
+        return item
+    }
+
     fun add(key: UUID, value: Item) {
         dateModified = LocalDateTime.now()
 
