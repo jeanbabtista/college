@@ -360,6 +360,7 @@ class Parser(private val scanner: Scanner) {
         T.FOR -> recognizeTerminal(T.FOR) && recognizeFor()
         T.VARIABLE -> recognizeTerminal(T.VARIABLE) && recognizeAssign()
         T.WRITE -> recognizeTerminal(T.WRITE) && recognizeE()
+        T.SEMI -> recognizeTerminal(T.SEMI)
         else -> true
     }
 
@@ -368,13 +369,16 @@ class Parser(private val scanner: Scanner) {
         else -> true
     }
 
-    private fun recognizeFor() = recognizeTerminal(T.VARIABLE) &&
+    private fun recognizeFor(): Boolean = when (last?.value ?: true) {
+        T.VARIABLE -> recognizeTerminal(T.VARIABLE) &&
             recognizeAssign() &&
             recognizeTerminal(T.TO) &&
             recognizeE() &&
             recognizeTerminal(T.DO) &&
             recognizeStart() &&
             recognizeTerminal(T.DONE)
+        else -> true
+    }
 
     private fun recognizeAssign() = recognizeTerminal(T.ASSIGN) && recognizeE()
 
@@ -425,6 +429,18 @@ class Parser(private val scanner: Scanner) {
 }
 
 fun main(args: Array<String>) {
+    /* for (i in 0..1000)
+        if (i % 10 == 0) {
+            val scanner = Scanner(Example, File("src/main/kotlin/positive/example${i}.txt").inputStream())
+            print(if (Parser(scanner).recognize()) "accept\n" else "reject\n")
+        }
+
+    for (i in 0..1000)
+        if (i % 10 == 0) {
+            val scanner = Scanner(Example, File("src/main/kotlin/negative/example${i}.txt").inputStream())
+            print(if (Parser(scanner).recognize()) "accept\n" else "reject\n")
+        } */
+
     val scanner = Scanner(Example, File(args[0]).inputStream())
     print(if (Parser(scanner).recognize()) "accept" else "reject")
 }
