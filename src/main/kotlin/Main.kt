@@ -1,6 +1,52 @@
+/*
+--------------- SYNTAX GRAMMAR ---------------
+START   ::= ST SEMI
+ST      ::= for FOR | var AS | write E | epsilon
+SEMI    ::= ; START | epsilon
+FOR     ::= var AS to E do START done
+AS      ::= := E
+E       ::= TD0 PM0;
+PM0     ::= + TD0 PM0 | - TD0 PM0 | epsilon;
+TD0     ::= P1 TD;
+TD1     ::= * P1 TD1 | / P1 TD1 | epsilon
+P1      ::= PM1 P2
+P2      ::= ^ P1 | epsilon
+PM1     ::= - S | + S | S
+S       ::= ( START ) | float | variable
+
+TD -> times divide
+P -> power
+PM -> plus minus
+S -> symbol
+AS -> assign
+
+0 ... lowest priority
+n ... highest priority
+*/
+
 import java.io.File
 import java.io.InputStream
-import java.util.LinkedList
+import java.util.*
+
+// terminals
+object T {
+    const val FLOAT = 1
+    const val VARIABLE = 2
+    const val PLUS = 3
+    const val MINUS = 4
+    const val TIMES = 5
+    const val DIVIDE = 6
+    const val POW = 7
+    const val LPAREN = 8
+    const val RPAREN = 9
+    const val ASSIGN = 10
+    const val SEMI = 11
+    const val FOR = 12
+    const val TO = 13
+    const val DO = 14
+    const val DONE = 15
+    const val WRITE = 16
+}
 
 interface Automaton {
     val states: Set<Int>
@@ -223,7 +269,6 @@ object Example : Automaton {
             setTransition(29, char, 5)
 
         setValue(30, 16)
-
     }
 
     private fun setWhitespace() {
@@ -234,7 +279,10 @@ object Example : Automaton {
     }
 }
 
-class Scanner(private val automaton: Automaton, private val stream: InputStream) {
+class Scanner(
+    private val automaton: Automaton,
+    private val stream: InputStream
+) {
     private var state = automaton.startState
     private var last: Int? = null
     private var buffer = LinkedList<Byte>()
@@ -297,40 +345,86 @@ class Scanner(private val automaton: Automaton, private val stream: InputStream)
     }
 }
 
-fun name(value: Int) =
-    when (value) {
-        1 -> "float"
-        2 -> "variable"
-        3 -> "plus"
-        4 -> "minus"
-        5 -> "times"
-        6 -> "divide"
-        7 -> "pow"
-        8 -> "lparen"
-        9 -> "rparen"
-        10 -> "assign"
-        11 -> "semi"
-        12 -> "for"
-        13 -> "to"
-        14 -> "do"
-        15 -> "done"
-        16 -> "write"
-        else -> throw Error("Invalid value")
+class Parser(private val scanner: Scanner) {
+    private var last: Token? = null
+
+    fun recognize(): Boolean {
+        last = scanner.getToken()
+        val status = recognizeStart()
+        return if (last === null) status else false
     }
 
-fun printTokens(scanner: Scanner) {
-    val token = scanner.getToken()
+    private fun recognizeStart(): Boolean = recognizeStatement() && recognizeSemi()
 
-    if (token == null) {
-        println()
-        return
+    private fun recognizeStatement(): Boolean = when (last?.value ?: true) {
+        T.FOR -> recognizeTerminal(T.FOR) && recognizeFor()
+        T.VARIABLE -> recognizeTerminal(T.VARIABLE) && recognizeAssign()
+        T.WRITE -> recognizeTerminal(T.WRITE) && recognizeE()
+        else -> true
     }
 
-    println("${name(token.value)}(\"${token.lexeme}\") ")
-    printTokens(scanner)
+    private fun recognizeSemi(): Boolean = when (last?.value ?: true) {
+        T.SEMI -> recognizeTerminal(T.SEMI) && recognizeStart()
+        else -> true
+    }
+
+    private fun recognizeFor() = recognizeTerminal(T.VARIABLE) &&
+            recognizeAssign() &&
+            recognizeTerminal(T.TO) &&
+            recognizeE() &&
+            recognizeTerminal(T.DO) &&
+            recognizeStart() &&
+            recognizeTerminal(T.DONE)
+
+    private fun recognizeAssign() = recognizeTerminal(T.ASSIGN) && recognizeE()
+
+    private fun recognizeE(): Boolean =
+        recognizeT() && recognizeEE()
+
+    private fun recognizeEE(): Boolean = when (last?.value ?: true) {
+        T.PLUS -> recognizeTerminal(T.PLUS) && recognizeT() && recognizeEE()
+        T.MINUS -> recognizeTerminal(T.MINUS) && recognizeT() && recognizeEE()
+        else -> true
+    }
+
+    private fun recognizeT(): Boolean = recognizeX() && recognizeTT()
+
+    private fun recognizeTT(): Boolean = when (last?.value ?: true) {
+        T.TIMES -> recognizeTerminal(T.TIMES) && recognizeX() && recognizeTT()
+        T.DIVIDE -> recognizeTerminal(T.DIVIDE) && recognizeX() && recognizeTT()
+        else -> true
+    }
+
+    private fun recognizeX(): Boolean = recognizeY() && recognizeXX()
+
+    private fun recognizeXX(): Boolean = when (last?.value ?: true) {
+        T.POW -> recognizeTerminal(T.POW) && recognizeX()
+        else -> true
+    }
+
+    private fun recognizeY(): Boolean = when (last?.value ?: true) {
+        T.MINUS -> recognizeTerminal(T.MINUS) && recognizeF()
+        T.PLUS -> recognizeTerminal(T.PLUS) && recognizeF()
+        else -> recognizeF()
+    }
+
+    private fun recognizeF(): Boolean = when (last?.value ?: false) {
+        T.LPAREN -> recognizeTerminal(T.LPAREN) && recognizeE() && recognizeTerminal(T.RPAREN)
+        T.FLOAT -> recognizeTerminal(T.FLOAT)
+        T.VARIABLE -> recognizeTerminal(T.VARIABLE)
+        else -> false
+    }
+
+    private fun recognizeTerminal(value: Int): Boolean {
+        if (last?.value != value)
+            return false
+
+        last = scanner.getToken()
+        return true
+    }
 }
 
 fun main(args: Array<String>) {
     val scanner = Scanner(Example, File(args[0]).inputStream())
-    printTokens(scanner)
+    print(if (Parser(scanner).recognize()) "accept" else "reject")
 }
