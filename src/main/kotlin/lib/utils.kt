@@ -4,11 +4,17 @@ import java.time.LocalDateTime
 import kotlin.math.round
 import kotlin.test.assertEquals
 
-fun roundToTwoDecimals(number: Double): Double = round(number * 100) / 100
+fun roundToTwoDecimals(number: Double): Double =
+    round(number * 100) / 100
 
-fun roundPercentage(number: Double): Double = round(number * 10000) / 100
+fun roundPercentage(number: Double): Double =
+    round(number * 10000) / 100
 
-fun getDateString(date: LocalDateTime) = "${date.dayOfMonth}. ${date.monthValue}. ${date.year}, ${date.hour}:${date.minute}"
+fun getDateString(date: LocalDateTime) =
+    "${date.dayOfMonth}. ${date.monthValue}. ${date.year}, ${date.hour}:${date.minute}"
+
+fun getErrorMessage(message: String) =
+    "[ ERROR ] $message"
 
 fun testBarcodeValidation() {
     assertEquals(true, BarcodeUtil.isBarcodeValid("96385074"), "GTIN-8 valid code")

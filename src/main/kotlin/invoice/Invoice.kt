@@ -2,14 +2,11 @@ package invoice
 
 import company.Company
 import enums.Payment
-import lib.BarcodeUtil
-import lib.Printer
-import lib.getDateString
-import lib.roundToTwoDecimals
+import lib.*
 import java.time.LocalDateTime
 import java.util.*
 
-class Invoice (
+class Invoice(
     private val barcode: String,
     private var items: Items,
     private var issuer: Company,
@@ -24,7 +21,7 @@ class Invoice (
             BarcodeUtil.isBarcodeValid(barcode)
 
             if (cashierName == "")
-                throw Exception("[ Invoice.kt ] Cashier name cannot be empty")
+                throw Exception(getErrorMessage("Cashier name cannot be empty"))
         } catch (e: Exception) {
             throw e
         }
@@ -32,14 +29,19 @@ class Invoice (
 
     companion object {
         var counter: Int = 0
-        fun counter(): Int = counter
     }
 
     private val id: UUID = UUID.randomUUID()
-    private val invoiceNumber = "${issuer.name.replace(" ","").uppercase().substring(0, 5)}-$counter"
+    private val invoiceNumber = "${issuer.name.replace(" ", "").uppercase().substring(0, 5)}-$counter"
     private val dateCreated = LocalDateTime.now()
     private var dateModified = LocalDateTime.now()
 
+
+    /**
+     * Prints invoice to the screen.
+     *
+     * @return Unit.
+     */
     fun print() = println(toString())
 
     private var cashierName = cashierName
@@ -60,7 +62,12 @@ class Invoice (
             field = value
         }
 
-    // other
+
+    /**
+     * Returns string representation of Invoice class
+     *
+     * @return String.
+     */
     override fun toString(): String {
         // issuer
         Printer.addText(issuer.toString())

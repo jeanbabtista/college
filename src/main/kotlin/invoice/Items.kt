@@ -1,10 +1,11 @@
 package invoice
 
 import lib.Printer
+import lib.getErrorMessage
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
-class Items: LinkedHashMap<UUID, Item>() {
+class Items : LinkedHashMap<UUID, Item>() {
     // values
     val id: UUID = UUID.randomUUID()
     private val dateCreated = LocalDateTime.now()
@@ -13,40 +14,19 @@ class Items: LinkedHashMap<UUID, Item>() {
     val totalPrice: Double
         get() {
             var sum = 0.0
-            forEach{(_, item) -> print("${item.totalPrice} ")}
-            forEach{ (_, item) -> sum += item.totalPrice }
+            forEach { (_, item) -> sum += item.totalPrice }
             return sum
         }
 
-    override fun put(key: UUID, value: Item): Item? {
-        dateModified = LocalDateTime.now()
-
-        // first entry
-        if (!super.containsKey(key))
-            return super.put(key, value)
-
-        // next entries
-        val item = super.get(key)
-        item!!.quantity += value.quantity
-
-        return item
-    }
-
-    override fun remove(key: UUID): Item? {
-        dateModified = LocalDateTime.now()
-
-        if (!super.containsKey(key))
-            return null
-
-        val item = super.get(key)
-
-        if (item!!.quantity < 1)
-            throw java.lang.IllegalStateException("[ Items.kt ] Error deleting item ('${item.name}') - item does not contain enough quantity to be deleted")
-
-        item.quantity -= 1
-        return item
-    }
-
+    /**
+     * Adds [value]'s quantity to current [key]'s item quantity.
+     *
+     * If key doesn't exist yet, it creates new item with that key, otherwise it only performs addition.
+     *
+     * @param key UUID
+     * @param value Item
+     * @return Unit.
+     */
     fun add(key: UUID, value: Item) {
         dateModified = LocalDateTime.now()
 
@@ -61,56 +41,96 @@ class Items: LinkedHashMap<UUID, Item>() {
         item!!.quantity += value.quantity
     }
 
+    /**
+     * Subtracts [quantity] by given [key] from the item.
+     *
+     * This does not remove the item from the list, it only subtracts quantity from the item. If the subtracted
+     * quantity results in being less than 0, then an Error is thrown.
+     *
+     * @param key UUID
+     * @param quantity Int
+     * @return Unit.
+     */
     fun delete(key: UUID, quantity: Int) {
         dateModified = LocalDateTime.now()
 
         if (!super.containsKey(key))
-            throw Exception("[ Items.kt ] Error deleting item - item ID unknown")
+            throw Exception(getErrorMessage("Error deleting item - item ID unknown"))
 
         val item = super.get(key)
 
         if (quantity < 0)
-            throw Exception("[ Items.kt ] Error deleting item ('${item!!.name}') - quantity is negative")
+            throw Exception(getErrorMessage("Error deleting item ('${item!!.name}') - quantity is negative"))
 
         if (item!!.quantity < quantity)
-            throw java.lang.IllegalStateException("[ Items.kt ] Error deleting item ('${item.name}') - item does not contain enough quantity to be deleted")
+            throw java.lang.IllegalStateException(
+                getErrorMessage(
+                    "Error deleting item ('${item.name}') - item does not contain enough quantity to be deleted"
+                )
+            )
 
         item.quantity -= quantity
     }
 
+    /**
+     * Updates item's [pricePerPiece] correspondingly.
+     *
+     * @param id UUID
+     * @param pricePerPiece Double
+     * @return Unit.
+     */
     fun updatePricePerPiece(id: UUID, pricePerPiece: Double) {
         dateModified = LocalDateTime.now()
 
         val item = super.get(id)
 
         if (item === null)
-            throw Exception("[ Items.kt ] Error updating price per piece - item ID unknown")
+            throw Exception(getErrorMessage("Error updating price per piece - item ID unknown"))
 
         item.pricePerPiece = pricePerPiece
     }
 
+    /**
+     * Updates item's [quantity] correspondingly.
+     *
+     * @param id UUID
+     * @param quantity Int
+     * @return Unit.
+     */
     fun updateQuantity(id: UUID, quantity: Int) {
         dateModified = LocalDateTime.now()
 
         val item = super.get(id)
 
         if (item === null)
-            throw Exception("[ Items.kt ] Error updating quantity - item ID unknown")
+            throw Exception(getErrorMessage("Error updating quantity - item ID unknown"))
 
         item.quantity = quantity
     }
 
+    /**
+     * Updates item's [discount] correspondingly.
+     *
+     * @param id UUID
+     * @param discount Double
+     * @return Unit.
+     */
     fun updateDiscount(id: UUID, discount: Double) {
         dateModified = LocalDateTime.now()
 
         val item = super.get(id)
 
         if (item === null)
-            throw Exception("[ Items.kt ] Error updating discount - item ID unknown")
+            throw Exception(getErrorMessage("Error updating quantity - item ID unknown"))
 
         item.discount = discount
     }
 
+    /**
+     * Returns string representation of Items class
+     *
+     * @return String.
+     */
     override fun toString(): String {
         // header row
         Printer.addColumn("Article")
@@ -125,7 +145,7 @@ class Items: LinkedHashMap<UUID, Item>() {
         Printer.addLine('=', 6)
 
         var i = 0
-        forEach{ (_, item) ->
+        forEach { (_, item) ->
             Printer.addText(item.toString())
             if (i++ != super.size - 1)
                 Printer.addLn()

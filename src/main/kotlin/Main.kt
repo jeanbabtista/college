@@ -1,5 +1,6 @@
 import company.Company
 import enums.Tax
+import invoice.InternalItem
 import invoice.Invoice
 import invoice.Item
 import invoice.Items
@@ -8,7 +9,14 @@ import java.util.*
 
 fun main() {
     try {
-        val ids = arrayOf(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+        val ids = arrayOf(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        )
 
         val items = Items()
         items.add(ids[0], Item("Banana", 1.99, "96385074", 2))
@@ -16,6 +24,7 @@ fun main() {
         items.add(ids[2], Item("Coffee", 11.99, "4070071967072", 1, discount = .2))
         items.add(ids[3], Item("T-Shirt", 29.99, "00012345600012", 2, tax = Tax.GENERAL))
         items.add(ids[4], Item("Pencil", 1.49, "08012349999999997", 3))
+        items.add(ids[5], InternalItem(291u, "Banana", 1.99, "96385074"))
 
         // delete
         items.delete(ids[0], 1)
@@ -56,8 +65,8 @@ fun main() {
 
         invoice.print()
 
-        val countryForBarcode = BarcodeUtil.getCompanyCountryFromBarcode("3830037942014")
-        println(countryForBarcode)
+        val barcode = "3830037942014"
+        println("Country from barcode $barcode: ${BarcodeUtil.getCompanyCountryFromBarcode(barcode)}")
     } catch (e: Exception) {
         println(e.message)
     }

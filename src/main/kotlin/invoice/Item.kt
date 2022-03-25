@@ -1,13 +1,10 @@
 package invoice
 
 import enums.Tax
-import lib.BarcodeUtil
-import lib.Printer
-import lib.roundPercentage
-import lib.roundToTwoDecimals
+import lib.*
 import java.time.LocalDateTime
 
-class Item (
+open class Item(
     name: String,
     pricePerPiece: Double,
     barcode: String,
@@ -17,19 +14,20 @@ class Item (
 ) {
     init {
         try {
-            BarcodeUtil.isBarcodeValid(barcode)
+            if (!BarcodeUtil.isBarcodeValid(barcode))
+                throw java.lang.IllegalArgumentException(getErrorMessage("Invalid barcode"))
 
             if (name == "")
-                throw Exception("[ Item.kt ] Item name cannot be empty")
+                throw Exception(getErrorMessage("Item name cannot be empty"))
 
             if (pricePerPiece <= 0.0)
-                throw Exception("[ Item.kt ] Price per piece for '$name' must be bigger than 0")
+                throw Exception(getErrorMessage("Price per piece for '$name' must be bigger than 0"))
 
             if (quantity <= 0)
-                throw Exception("[ Item.kt ] Quantity for '$name' must be bigger than 0")
+                throw Exception(getErrorMessage("Quantity for '$name' must be bigger than 0"))
 
-            if (discount < 0.0|| discount > 1.0)
-                throw Exception("[ Item.kt ] Discount for '$name' has to be a number between 0 and 1")
+            if (discount < 0.0 || discount > 1.0)
+                throw Exception(getErrorMessage("Discount for '$name' has to be a number between 0 and 1"))
         } catch (e: Exception) {
             throw e
         }
@@ -75,6 +73,11 @@ class Item (
 
     // private var netPriceNoDiscount = totalPrice * (1.0 - taxRate)
 
+    /**
+     * Returns string representation of Item class
+     *
+     * @return String.
+     */
     override fun toString(): String {
         Printer.addColumn(name)
         Printer.addColumn(quantity.toString())

@@ -1,6 +1,7 @@
 package company
 
 import lib.Printer
+import lib.getErrorMessage
 import java.time.LocalDateTime
 
 class Company(
@@ -16,10 +17,10 @@ class Company(
     init {
         try {
             if (name == "")
-                throw Exception("[ Company.kt ] Item for '$name' name cannot be empty")
+                throw Exception(getErrorMessage("Item for '$name' name cannot be empty"))
 
             if (fullName == "")
-                throw Exception("[ Company.kt ] Full for '$name' name cannot be empty")
+                throw Exception(getErrorMessage("Full name for '$name' name cannot be empty"))
         } catch (e: Exception) {
             throw e
         }
@@ -33,6 +34,11 @@ class Company(
 
     private val dateSignIn = LocalDateTime.now()
 
+    /**
+     * Returns string representation of Company class
+     *
+     * @return String.
+     */
     override fun toString(): String {
         Printer.addTextLn(name)
         Printer.addTextLn(location)
