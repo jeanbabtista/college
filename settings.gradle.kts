@@ -1,3 +1,3 @@
 
-rootProject.name = "rv04-billing"
+rootProject.name = "princpj-billing"
 
