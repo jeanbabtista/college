@@ -18,6 +18,8 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation(kotlin("test"))
     compileOnly("org.jetbrains.dokka:dokka-core:1.6.10")
+    implementation("mysql:mysql-connector-java:8.0.28")
+    implementation("com.google.code.gson:gson:2.9.0")
 }
 
 tasks.test {

@@ -5,6 +5,7 @@ import invoice.Invoice
 import invoice.Item
 import invoice.Items
 import lib.BarcodeUtil
+import lib.DatabaseUtil
 import java.util.*
 
 fun main() {
@@ -67,7 +68,17 @@ fun main() {
 
         val barcode = "3830037942014"
         println("Country from barcode $barcode: ${BarcodeUtil.getCompanyCountryFromBarcode(barcode)}")
+        println()
+
+        val connection = DatabaseUtil.getConnection()
+        if (connection === null)
+            throw Exception("Database is not connected")
+
+        val query = "SELECT * FROM actor LIMIT 10"
+        println("Querying ... [ SELECT * FROM actor LIMIT 10 ]")
+        val data = DatabaseUtil.query(query)
+        DatabaseUtil.displayData(data, 25)
     } catch (e: Exception) {
-        println(e.message)
+        println("Error: ${e.message}")
     }
 }
