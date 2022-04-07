@@ -4,8 +4,10 @@
  * @param {string} message the error or success message
  * @param {any?} data can be array of objects or a single object
  */
-const getJsonResponse = (error, message, data) => {
-  error, message, data
-}
+const getJsonResponse = (
+  error: boolean,
+  message: string,
+  data: any = null
+) => ({ error, message, data })
 
-module.exports = getJsonResponse
+export default getJsonResponse
