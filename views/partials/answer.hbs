@@ -1,0 +1,77 @@
+<div class='flex justify-between w-1/2 {{#if answer.isCorrect}}bg-green-800 p-5{{/if}}'>
+  <div class='p-5 flex-1'>
+    <div class="mb-6">
+      <image>
+        <img src="/images/{{answer.user.imagePath}}" alt="image" class="object-fit" width='50px' height='50px'>
+      </image>
+
+      <h1 class='text-white text-2xl mb-5'>{{answer.user.username}}</h1>
+      <div class='flex'>
+        <div>
+          {{> bulletIcon}}
+        </div>
+        <p class='text-gray-400 dark:text-gray-400 mb-5 ml-2'>{{answer.description}}</p>
+      </div>
+
+      <div class='flex justify-between mb-2'><p class='text-gray-400 dark:text-gray-400 mt-5 mb-1 text-xs'>Posted
+        on {{formatDate answer.createdAt}}</p>
+
+        {{#if loggedUser}}
+          {{#ifEquals loggedUser._id answer.user._id}}
+            <div class='w-1/2'>
+              <div class='flex justify-end'>
+                <a href='/question/{{question._id}}/answer/{{answer._id}}/delete'>
+                  {{> deleteBtn}}
+                </a>
+              </div>
+            </div>
+          {{/ifEquals}}
+        {{/if}}
+      </div>
+
+      <hr>
+    </div>
+  </div>
+
+  <div class='mt-5'>
+    <div class='flex'>
+      <div>
+        <div class='flex'>
+          <a href='/question/{{question._id}}/answer/{{answer._id}}/upvote' class='max-w-max'>{{> upvote}}</a>
+          <p class='text-gray-400 dark:text-gray-400 mt-5 mb-1 text-xs'>{{answer.numUpVotes}}</p>
+        </div>
+
+        <div class='flex'>
+          <a href='/question/{{question._id}}/answer/{{answer._id}}/downvote' class='max-w-max'>{{> downvote}}</a>
+          <p class='text-gray-400 dark:text-gray-400 mt-5 mb-1 text-xs'>{{answer.numDownVotes}}</p>
+        </div>
+      </div>
+
+      {{#if loggedUser}}
+        {{#ifEquals loggedUser._id question.user._id}}
+          {{#unless foundCorrectAnswer}}
+            <div class='mt-5 ml-10'>
+              <a href='/question/{{question._id}}/answer/{{answer._id}}/true'>
+                {{> likeIcon}}
+              </a>
+              <p class='text-gray-400 dark:text-gray-400 mt-1 text-xs'>Mark as correct</p>
+            </div>
+          {{/unless}}
+        {{/ifEquals}}
+      {{/if}}
+
+      {{#if loggedUser}}
+        {{#ifEquals loggedUser._id question.user._id}}
+          {{#if answer.isCorrect}}
+            <div class='mt-5 ml-10'>
+              <a href='/question/{{question._id}}/answer/{{answer._id}}/false'>
+                {{> dislikeIcon}}
+              </a>
+              <p class='text-gray-400 dark:text-gray-400 mt-1 text-xs'>Mark as incorrect</p>
+            </div>
+          {{/if}}
+        {{/ifEquals}}
+      {{/if}}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+<h1 class='text-2xl text-white'>Username: {{currentUser.username}}</h1>
+<h1 class='text-2xl text-white'>Email: {{currentUser.email}}</h1>
+
+<img src='/images/{{currentUser.imagePath}}' alt='image'>
+
+<p class='text-white text-xl'>{{numQuestions}} questions, {{numAnswers}} answers and {{numChosenAnswers}} chosen
+  answers</p>
+
+<div class="grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 my-10">
+  {{#each questions}}
+    {{> questionCard question=this}}
+  {{/each}}
+</div>

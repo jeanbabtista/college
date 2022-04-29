@@ -1,0 +1,82 @@
+<div class="flex justify-center">
+  <div class="max-w-md w-full space-y-8">
+    <div>
+      <img class="mx-auto h-12 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
+           alt="Workflow">
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-200">
+        Register
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-200">
+        Or
+        <a href="/user/login"
+           class="font-medium text-indigo-600 hover:text-indigo-500">
+          login if you already have an account
+        </a>
+      </p>
+    </div>
+
+    <form class="space-y-4" method="post" action="" enctype="multipart/form-data">
+      <div class="mb-4">
+        <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Username
+          *</label>
+        <input type="text" id="username" name="username"
+               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 +
+                        dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 +
+                        dark:focus:border-blue-500 dark:shadow-sm-light"
+               required>
+      </div>
+
+      <div class="mb-6">
+        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Email
+          *</label>
+        <input type="email" id="email" name="email"
+               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                       focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700
+                       dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
+                       dark:focus:border-blue-500 dark:shadow-sm-light"
+               placeholder="name.surname@gmail.com" required>
+      </div>
+
+      <div class="mb-6">
+        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Password
+          *</label>
+        <input type="password" id="password" name="password"
+               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                       focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700
+                       dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
+                       dark:focus:border-blue-500 dark:shadow-sm-light"
+               required>
+      </div>
+
+      <div class="mb-6">
+        <label for="repeat_password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+          Repeat password *</label>
+        <input type="password" id="repeat_password" name="repeat_password"
+               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                       focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700
+                       dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
+                       dark:focus:border-blue-500 dark:shadow-sm-light"
+               required>
+      </div>
+
+      <!--image-->
+      <div class="mb-6">
+        <label for="avatar" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Image</label>
+        <input type="file" id="avatar" name="avatar"
+               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                       focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700
+                       dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
+                       dark:focus:border-blue-500 dark:shadow-sm-light"
+               required>
+      </div>
+
+      <button type="submit" name="submit"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium
+                    rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700
+                    dark:focus:ring-blue-800">
+        Register new account
+      </button>
+    </form>
+  </div>
+</div>

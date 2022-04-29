@@ -1,0 +1,40 @@
+<div class='mb-10 border-2 border-white p-5'>
+  <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+    {{question.title}}
+  </h5>
+
+  <p class="font-normal text-gray-700 dark:text-gray-400 mb-16">{{question.description}}</p>
+
+  <div class='flex justify-between'>
+    <h1 class='my-3 font-thin text-gray-400 dark:text-gray-400'>Posted by {{question.user.username}} on {{formatDate
+      question.createdAt}}</h1>
+
+    <a href='/user/{{question.user._id}}' class='my-3 font-thin text-gray-400 dark:text-gray-400'>Visit profile</a>
+
+    {{#if user}}
+      {{#ifEquals question.user._id user._id }}
+        <div class='w-1/2'>
+          <div class='flex justify-end'>
+            <a href='/question/{{question._id}}/delete'>
+              {{> deleteBtn }}
+            </a>
+          </div>
+        </div>
+      {{/ifEquals}}
+    {{/if}}
+  </div>
+
+  <div>
+    {{#each tags}}
+      {{> badge message=this.title}}
+    {{/each}}
+  </div>
+</div>
+
+{{> answerForm questionId=question._id}}
+
+<div class='mt-10'>
+  {{#each answers}}
+    {{> answer answer=this loggedUser=../user question=../question foundCorrectAnswer=../foundCorrectAnswer}}
+  {{/each}}
+</div>
