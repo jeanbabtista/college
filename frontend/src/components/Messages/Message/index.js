@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Grid, Box, Typography, Chip, IconButton } from '@mui/material'
+import { Grid, Box, Typography, Chip, IconButton, Button } from '@mui/material'
 import { ArrowUpwardOutlined, ArrowDownwardOutlined } from '@mui/icons-material'
 import { useParams } from 'react-router-dom'
 
 import { printDate } from '../../../utils/date'
-import { findOneById, vote } from '../../../api/message'
+import { findOneById, markInappropriate, vote } from '../../../api/message'
 import Comments from './Comments'
 import { toast } from 'react-toastify'
 
@@ -28,8 +28,8 @@ export default function Message() {
 
   useEffect(() => console.log(message), [message])
 
-  const handleUpVote = async () => {
-    const { error, message: apiMessage } = await vote(message._id, 'up')
+  const handleVote = async (option) => {
+    const { error, message: apiMessage } = await vote(message._id, option)
 
     if (error) {
       toast.error(apiMessage, {
@@ -44,14 +44,32 @@ export default function Message() {
     })
   }
 
-  const handleDownVote = async () => {
-    console.log('downvote')
+  const handleInappropriate = async () => {
+    const { error, message: apiMessage } = await markInappropriate(message._id)
+
+    if (error) {
+      toast.error(apiMessage, {
+        position: toast.POSITION.BOTTOM_RIGHT,
+      })
+
+      return
+    }
+
+    toast.success(apiMessage, {
+      position: toast.POSITION.BOTTOM_RIGHT,
+    })
   }
 
-  if (loading) return <Typography variant="h3">Loading...</Typography>
+  if (loading)
+    return (
+      <Typography mt={4} variant="h2">
+        Loading...
+      </Typography>
+    )
+
   if (error)
     return (
-      <Typography variant="p" color="red">
+      <Typography mt={4} variant="h3" color="red">
         {error}
       </Typography>
     )
@@ -76,20 +94,28 @@ export default function Message() {
         </Box>
 
         <Box>
-          <IconButton onClick={handleUpVote}>
+          <IconButton onClick={() => handleVote('up')}>
             <ArrowUpwardOutlined />
+            <Typography ml={2} variant="p">
+              {message.numUpVotes}
+            </Typography>
           </IconButton>
 
           <Box display="hidden"></Box>
 
-          <IconButton onClick={handleDownVote}>
+          <IconButton onClick={() => handleVote('down')}>
             <ArrowDownwardOutlined />
+            <Typography ml={2} variant="p">
+              {message.numDownVotes}
+            </Typography>
           </IconButton>
         </Box>
       </Grid>
       <Grid item xs={8}>
         <Comments messageId={message._id} comments={message.comments} />
       </Grid>
+
+      <Button onClick={handleInappropriate}>Mark as innapropriate</Button>
     </Grid>
   )
 }

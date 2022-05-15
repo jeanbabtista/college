@@ -6,7 +6,7 @@ const findOne = async (req, res) => {
   try {
     const { id } = req.params
 
-    const user = await UserModel.findById(id).select('-_id -__v -password')
+    const user = await UserModel.findById(id).select('-password')
     if (!user) throw new Error('User not found')
 
     // get number of messages per user

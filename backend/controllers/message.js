@@ -91,13 +91,16 @@ const findAll = async (req, res) => {
 
 const findByTags = async (req, res) => {
   try {
-    const { id } = req.params
+    const { tag: title } = req.params
 
-    const tag = await TagModel.findById(id)
+    const tag = await TagModel.findOne({ title })
     if (!tag) throw new Error('Tag not found')
 
     // filter messages by tags
-    const messages = await MessageModel.find({ tags: id }).populate('user').populate('votes')
+    const messages = await MessageModel.find({ tags: tag._id })
+      .populate('user')
+      .populate('votes')
+      .populate('tags')
 
     Render.info(req, res, 'Successfully fetched all messages by tag', messages)
   } catch (e) {

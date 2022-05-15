@@ -67,8 +67,8 @@ export const endpoints = {
       url: getUrlWithHost('/message'),
       method: methods.GET,
     },
-    getAllByTag: (tagId) => ({
-      url: getUrlWithHost(`/tag/${tagId}`),
+    getAllByTag: (tagName) => ({
+      url: getUrlWithHost(`/message/tags/${tagName}`),
       method: methods.GET,
     }),
   },

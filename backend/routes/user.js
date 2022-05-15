@@ -33,6 +33,6 @@ router.get('/logout', isAuthenticated, logout)
 /*
 URL: GET http://localhost:5000/user/626c1df24deb2e27ae47db17
 */
-router.get('/:id', isAuthenticated, findOne)
+router.get('/:id', findOne)
 
 module.exports = router

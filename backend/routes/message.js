@@ -42,8 +42,8 @@ URL: GET http://localhost:5000/message
 router.get('/', findAll)
 
 /*
-URL: GET http://localhost:5000/message/626d4a807e0e69b0048a1900
+URL: GET http://localhost:5000/message/tags/tag1
 */
-router.get('/:id', findByTags)
+router.get('/tags/:tag', findByTags)
 
 module.exports = router

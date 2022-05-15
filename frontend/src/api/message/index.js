@@ -53,3 +53,33 @@ export const vote = async (messageId, option) => {
     return { error: true, message: e.message }
   }
 }
+
+export const markInappropriate = async (messageId) => {
+  try {
+    const { method, url } = endpoints.message.markInappropriate(messageId)
+    const response = await axios({ method, url, withCredentials: true /* params: { id } */ })
+    return { ...response.data }
+  } catch (e) {
+    return { error: true, message: e.message }
+  }
+}
+
+export const getAllByTag = async (tag) => {
+  try {
+    const { method, url } = endpoints.message.getAllByTag(tag)
+    const response = await axios({ method, url })
+    return { ...response.data }
+  } catch (e) {
+    return { error: true, message: e.message }
+  }
+}
+
+export const getAllByFilterDecay = async () => {
+  try {
+    const { method, url } = endpoints.message.filterDecay
+    const response = await axios({ method, url })
+    return { ...response.data }
+  } catch (e) {
+    return { error: true, message: e.message }
+  }
+}

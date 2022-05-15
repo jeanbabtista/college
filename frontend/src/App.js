@@ -13,6 +13,7 @@ import Login from './components/Login'
 import Register from './components/Register'
 import Messages from './components/Messages'
 import Message from './components/Messages/Message'
+import User from './components/User'
 
 export default function App() {
   const [stateUser, setStateUser] = useState(null)
@@ -48,6 +49,7 @@ export default function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/messages/:id" element={<Message />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/user/:id" element={<User />} />
               <Route
                 path="*"
                 element={

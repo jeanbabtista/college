@@ -2,8 +2,7 @@ const Render = require('../lib/render')
 
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) return next()
-
-  Render.info(req, res, 'You must be logged in to access this page')
+  Render.error(req, res, new Error('You must be logged in to access this page'))
 }
 
 const isUnauthenticated = (req, res, next) => {

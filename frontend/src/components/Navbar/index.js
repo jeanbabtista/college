@@ -47,7 +47,7 @@ export default function Navbar() {
           <Box sx={{ display: 'hidden', flexGrow: 1 }} />
           {user ? (
             <>
-              <Typography>{user.username}</Typography>
+              <Button onClick={() => navigate(`/user/${user.id}`)}>Profile</Button>
               <Button onClick={handleLogout} sx={{ marginLeft: '10px' }}>
                 Logout
               </Button>
