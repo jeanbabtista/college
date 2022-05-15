@@ -48,6 +48,7 @@ const register = async (req, res) => {
 const login = (req, res) => {
   req.isAuthenticated()
     ? Render.info(req, res, 'Successfully logged in', {
+        id: req.user._id,
         username: req.user.username,
         email: req.user.email,
       })

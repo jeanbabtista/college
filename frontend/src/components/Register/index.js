@@ -1,25 +1,43 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  Grid,
-  Link,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { useState } from 'react'
+import { Avatar, Box, Button, Grid, Link, TextField, Typography } from '@mui/material'
 import { LockOutlined } from '@mui/icons-material'
+import { toast } from 'react-toastify'
+import { postRegister } from '../../api/auth'
+import { useNavigate } from 'react-router-dom'
 
 export default function Register() {
-  const handleSubmit = (e) => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const data = new FormData(e.currentTarget)
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
+    if (!username || !password || !email) {
+      toast.error('Please fill all fields', {
+        position: toast.POSITION.TOP_CENTER,
+      })
+
+      return
+    }
+
+    const response = await postRegister(username, password, email)
+    const { error, message } = response
+
+    if (error) {
+      toast.error(error.message, {
+        position: toast.POSITION.TOP_CENTER,
+      })
+
+      return
+    }
+
+    toast.success(message, {
+      position: toast.POSITION.TOP_CENTER,
     })
+
+    navigate('/login')
   }
 
   return (
@@ -37,27 +55,18 @@ export default function Register() {
       <Typography component="h1" variant="h5">
         Sign up
       </Typography>
-      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <TextField
               autoComplete="given-name"
-              name="firstName"
+              name="username"
               required
               fullWidth
-              id="firstName"
-              label="First Name"
+              id="username"
+              label="Username"
+              onKeyUp={(e) => setUsername(e.target.value)}
               autoFocus
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              id="lastName"
-              label="Last Name"
-              name="lastName"
-              autoComplete="family-name"
             />
           </Grid>
           <Grid item xs={12}>
@@ -67,6 +76,7 @@ export default function Register() {
               id="email"
               label="Email Address"
               name="email"
+              onKeyUp={(e) => setEmail(e.target.value)}
               autoComplete="email"
             />
           </Grid>
@@ -78,13 +88,8 @@ export default function Register() {
               label="Password"
               type="password"
               id="password"
+              onKeyUp={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={<Checkbox value="allowExtraEmails" color="primary" />}
-              label="I want to receive inspiration, marketing promotions and updates via email."
             />
           </Grid>
         </Grid>

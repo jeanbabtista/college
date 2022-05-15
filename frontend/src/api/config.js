@@ -1,11 +1,5 @@
 export const getUrlWithHost = (url) => `http://localhost:5000${url}`
 
-export const getResponse = (isError, message, data = null) => ({
-  error: isError,
-  message,
-  data,
-})
-
 const methods = {
   GET: 'GET',
   POST: 'POST',
@@ -42,6 +36,10 @@ export const endpoints = {
     }),
   },
   message: {
+    findOneById: (id) => ({
+      url: getUrlWithHost(`/message/${id}`),
+      method: methods.GET,
+    }),
     /*
     requires fields:
     - title: string
@@ -69,12 +67,16 @@ export const endpoints = {
       url: getUrlWithHost('/message'),
       method: methods.GET,
     },
-  },
-  tag: {
-    getAllMessagesByTag: (tagId) => ({
+    getAllByTag: (tagId) => ({
       url: getUrlWithHost(`/tag/${tagId}`),
       method: methods.GET,
     }),
+  },
+  tag: {
+    getAll: {
+      url: getUrlWithHost('/tag'),
+      method: methods.GET,
+    },
   },
   comment: {
     /*

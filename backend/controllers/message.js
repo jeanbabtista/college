@@ -7,10 +7,13 @@ const decay = require('decay')
 
 const create = async (req, res) => {
   try {
-    const { title, imagePath, user: userId, tags } = req.body
+    if (!req.file) throw new Error('Missing image')
+    const imagePath = req.file.path
+
+    const { title, user: userId, tags } = req.body
     // tags example: ['tag1', 'tag2']
 
-    if (!title || !imagePath || !userId || !tags) throw new Error('Missing parameters')
+    if (!title || !userId || !tags) throw new Error('Missing parameters')
 
     const user = await UserModel.findById(userId)
     if (!user) throw new Error('User not found')
@@ -31,7 +34,19 @@ const create = async (req, res) => {
 
     await message.save()
 
-    Render.info(req, res, 'Message successfully created')
+    const created = await MessageModel.findById(message._id)
+      .populate('user', 'username -_id')
+      .populate('tags', 'title -_id')
+      .populate({
+        path: 'comments',
+        sort: { created_at: 1 },
+        populate: {
+          path: 'user',
+        },
+      })
+      .populate('votes', 'vote createdAt -_id')
+
+    Render.info(req, res, 'Message successfully created', created)
   } catch (e) {
     Render.error(req, res, e)
   }
@@ -65,9 +80,26 @@ const findAll = async (req, res) => {
     const messages = await MessageModel.find()
       .populate('user')
       .populate('votes')
+      .populate('tags', 'title -_id')
       .sort({ createdAt: -1 })
 
     Render.info(req, res, 'Successfully fetched all messages', messages)
+  } catch (e) {
+    Render.error(req, res, e)
+  }
+}
+
+const findByTags = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const tag = await TagModel.findById(id)
+    if (!tag) throw new Error('Tag not found')
+
+    // filter messages by tags
+    const messages = await MessageModel.find({ tags: id }).populate('user').populate('votes')
+
+    Render.info(req, res, 'Successfully fetched all messages by tag', messages)
   } catch (e) {
     Render.error(req, res, e)
   }
@@ -142,6 +174,7 @@ module.exports = {
   create,
   findOne,
   findAll,
+  findByTags,
   filterDecay,
   vote,
   markInappropriate,

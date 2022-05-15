@@ -18,7 +18,8 @@ const create = async (req, res) => {
     await comment.save()
     await MessageModel.updateOne({ _id: message._id }, { $push: { comments: comment._id } })
 
-    Render.info(req, res, 'Successfully created comment')
+    const created = await CommentModel.findById(comment._id).populate('user')
+    Render.info(req, res, 'Successfully created comment', created)
   } catch (e) {
     Render.error(req, res, e)
   }

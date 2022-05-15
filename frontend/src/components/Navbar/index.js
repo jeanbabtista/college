@@ -1,43 +1,60 @@
 import React, { useContext } from 'react'
 import { AppBar, Box, Button, IconButton, Toolbar, Typography } from '@mui/material'
-import MenuIcon from '@mui/icons-material/Menu'
 import { GlobalContext } from '../../context'
+import { useNavigate } from 'react-router-dom'
+import { getLogout } from '../../api/auth'
 import { toast } from 'react-toastify'
-import { postLogin } from '../../api/auth'
 
 export default function Navbar() {
-  const { user, setUser } = useContext(GlobalContext)
+  const { setUser, getUser } = useContext(GlobalContext)
+  const navigate = useNavigate()
+  const user = getUser()
 
-  const handleLogin = async () => {
-    try {
-      const response = await postLogin('asadf', 'asdf')
-      const { error, message, data } = response
+  const handleLogout = async () => {
+    const { error, message } = await getLogout()
 
-      if (error) {
-        toast.error(message)
-        return
-      }
-
-      toast.success(message)
-      setUser(data)
-    } catch (e) {
-      toast.error(e.message)
+    if (error) {
+      toast.error(error.message, {
+        position: toast.POSITION.TOP_CENTER,
+      })
+      return
     }
+
+    toast.success(message, {
+      position: toast.POSITION.TOP_CENTER,
+    })
+
+    setUser(null)
+    navigate('/login')
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-            <MenuIcon />
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+            onClick={() => navigate('/messages')}
+          >
+            <Typography variant="h6" component="div">
+              App
+            </Typography>
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            News
-          </Typography>
-          <Button color="inherit" onClick={handleLogin}>
-            {user ? user.username : 'Login'}
-          </Button>
+          <Box sx={{ display: 'hidden', flexGrow: 1 }} />
+          {user ? (
+            <>
+              <Typography>{user.username}</Typography>
+              <Button onClick={handleLogout} sx={{ marginLeft: '10px' }}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => navigate('/login')}>Login</Button>
+          )}
         </Toolbar>
       </AppBar>
     </Box>

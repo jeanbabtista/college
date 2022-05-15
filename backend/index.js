@@ -1,7 +1,7 @@
 const express = require('express')
-const path = require('path')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
+const { join } = require('path')
 const db = require('./lib/db')
 const passport = require('./config/passport/index')
 const cors = require('./config/cors')
@@ -11,14 +11,14 @@ db.connect()
   .then(() => console.log('Successfully connected to database'))
   .catch((e) => console.error('Error connecting to database:', e.message))
 
-// configure view engine
+// configuration
 const app = express()
+app.use('/images', express.static(join(__dirname, 'images')))
 
 // middleware
 app.use(cors)
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(express.static(path.join(__dirname, 'public')))
 app.use(cookieParser())
 app.use(session(require('./config/session')))
 app.use(passport.initialize({}))
